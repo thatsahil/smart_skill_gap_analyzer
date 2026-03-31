@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analyzer - Profile</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="index.html">About</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="profile-section" class="hero">
+            <div class="container">
+                <h1>Your Profile</h1>
+                <p>Keep your information up to date to get the best experience.</p>
+
+                <!-- Candidate Profile Form -->
+                <div id="candidate-profile" style="display: none;" class="profile-panel">
+                    <form id="candidate-profile-form">
+                        <div class="form-group">
+                            <label for="cand-name">Full Name:</label>
+                            <input type="text" id="cand-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cand-email">Email:</label>
+                            <input type="email" id="cand-email" name="email" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="cand-skills">Skills (comma separated):</label>
+                            <input type="text" id="cand-skills" name="skills" placeholder="e.g. Python, JavaScript, Machine Learning">
+                        </div>
+                        <div class="form-group">
+                            <label for="cand-experience">Experience Summary:</label>
+                            <textarea id="cand-experience" name="experience" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="cand-education">Education:</label>
+                            <input type="text" id="cand-education" name="education">
+                        </div>
+                        <button type="submit" class="btn">Update Profile</button>
+                    </form>
+                </div>
+
+                <!-- Company Profile Form -->
+                <div id="company-profile" style="display: none;" class="profile-panel">
+                    <form id="company-profile-form">
+                        <div class="form-group">
+                            <label for="comp-name">Company Name:</label>
+                            <input type="text" id="comp-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comp-email">Company Email:</label>
+                            <input type="email" id="comp-email" name="email" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="comp-website">Website:</label>
+                            <input type="url" id="comp-website" name="website" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="comp-industry">Industry:</label>
+                            <input type="text" id="comp-industry" name="industry">
+                        </div>
+                        <div class="form-group">
+                            <label for="comp-description">Company Description:</label>
+                            <textarea id="comp-description" name="description" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Update Profile</button>
+                    </form>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="danger-zone">
+                    <h3>Danger Zone</h3>
+                    <p>Once you delete your account, there is no going back. Please be certain.</p>
+                    <button id="delete-account-btn" class="btn btn-danger">Delete My Account</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>
