@@ -1,67 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Gap Analyzer - Sign Up</title>
+    <meta name="theme-color" content="#09090b">
+    <meta name="description"
+        content="Create your Skill Gap Analyzer account and start bridging your career skill gaps today.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Create Account — Skill Gap Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">Skill Gap Analyzer</div>
-            <div class="nav-links">
-                <a href="index.html">About</a>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Signup</a>
-            </div>
-        </nav>
-    </header>
+    <style>
+        body {
+            overflow-x: hidden;
+        }
 
-    <main>
-        <section id="signup" class="auth-section">
-            <div class="container">
-                <h2>Sign Up</h2>
-                <form class="auth-form">
+        .auth-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .auth-brand {
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-brand::before {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124, 106, 247, 0.08) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-1);
+        }
+
+        .brand-logo::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .brand-tagline {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .brand-tagline h2 {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: var(--text-1);
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+            margin-bottom: 16px;
+        }
+
+        .brand-tagline p {
+            font-size: 0.875rem;
+            color: var(--text-2);
+            line-height: 1.7;
+        }
+
+        .brand-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .brand-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--text-2);
+        }
+
+        .brand-feature::before {
+            content: '✓';
+            width: 18px;
+            height: 18px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(124, 106, 247, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--accent-light);
+            flex-shrink: 0;
+        }
+
+        .brand-footer {
+            font-size: 0.75rem;
+            color: var(--text-3);
+        }
+
+        .auth-form-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px var(--space-8);
+            background: var(--bg-base);
+            overflow-y: auto;
+        }
+
+        .auth-form-inner {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .auth-form-inner h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-1);
+            letter-spacing: -0.025em;
+            margin-bottom: 6px;
+        }
+
+        .auth-sub {
+            font-size: 0.85rem;
+            color: var(--text-2);
+            margin-bottom: 28px;
+        }
+
+        .auth-link {
+            color: var(--text-3);
+            font-size: 0.82rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .auth-link a {
+            color: var(--accent-light);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* User type toggle */
+        .type-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .type-toggle label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 16px;
+            border: 1px solid var(--border-md);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-2);
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .type-toggle input[type="radio"] {
+            display: none;
+        }
+
+        .type-toggle label:has(input:checked) {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            color: var(--accent-light);
+        }
+
+        .type-toggle label:hover:not(:has(input:checked)) {
+            border-color: var(--border-lg);
+            color: var(--text-1);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .type-toggle-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-2);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .auth-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-brand {
+                display: none;
+            }
+
+            .auth-form-panel {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-shell">
+        <!-- Left: Branding -->
+        <aside class="auth-brand">
+            <div class="brand-logo">Skill Gap Analyzer</div>
+            <div class="brand-tagline">
+                <h2>Start building your ideal career path</h2>
+                <p>Get semantic skill gap analysis, personalized roadmaps, and job fit scores — all in one place.</p>
+                <div class="brand-features">
+                    <div class="brand-feature">Upload once, analyze any job</div>
+                    <div class="brand-feature">SBERT semantic matching — not just keywords</div>
+                    <div class="brand-feature">Save reports and track your progress</div>
+                    <div class="brand-feature">Apply to jobs directly from the platform</div>
+                </div>
+            </div>
+            <p class="brand-footer">© 2026 Skill Gap Analyzer</p>
+        </aside>
+
+        <!-- Right: Signup form -->
+        <section class="auth-form-panel">
+            <div class="auth-form-inner">
+                <h1>Create your account</h1>
+                <p class="auth-sub">It's free. No credit card required.</p>
+
+                <form id="signup-form">
                     <div class="form-group">
-                        <label for="signup-name">Name:</label>
-                        <input type="text" id="signup-name" name="name" required>
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" name="name" placeholder="Jane Smith" autocomplete="name"
+                            required>
                     </div>
                     <div class="form-group">
-                        <label for="signup-email">Email:</label>
-                        <input type="email" id="signup-email" name="email" required>
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" placeholder="you@example.com"
+                            autocomplete="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="signup-password">Password:</label>
-                        <input type="password" id="signup-password" name="password" required>
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" placeholder="8+ characters"
+                            autocomplete="new-password" required>
                     </div>
                     <div class="form-group">
-                        <label for="signup-confirm-password">Confirm Password:</label>
-                        <input type="password" id="signup-confirm-password" name="confirm-password" required>
+                        <label for="signup-confirm-password">Confirm Password</label>
+                        <input type="password" id="signup-confirm-password" name="confirm-password"
+                            placeholder="••••••••" autocomplete="new-password" required>
                     </div>
-                    <div class="form-group">
-                        <label for="signup-user-type">I am a:</label>
-                        <select id="signup-user-type" name="user_type" required>
-                            <option value="candidate">Candidate</option>
-                            <option value="company">Company</option>
-                        </select>
+
+                    <!-- User type toggle (replaces dropdown) -->
+                    <div class="form-group" style="margin-bottom:24px;">
+                        <span class="type-toggle-label">I am a</span>
+                        <div class="type-toggle">
+                            <label>
+                                <input type="radio" name="user_type" id="type-candidate" value="candidate" checked>
+                                <span>👤</span> Candidate
+                            </label>
+                            <label>
+                                <input type="radio" name="user_type" id="type-company" value="company">
+                                <span>🏢</span> Company
+                            </label>
+                        </div>
                     </div>
-                    <button type="submit" class="btn">Sign Up</button>
-                    <p>Already have an account? <a href="login.html">Login</a></p>
+
+                    <button type="submit" class="btn">Create account</button>
                 </form>
+
+                <p class="auth-link">Already have an account? <a href="login.html">Sign in</a></p>
             </div>
         </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Skill Gap Analyzer. All rights reserved.</p>
-        </div>
-    </footer>
+    </div>
 
     <script src="js/script.js"></script>
+
+
 </body>
+
 </html>

@@ -42,13 +42,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Attach event listener for login form
-    const loginForm = document.querySelector('#login .auth-form');
+    const loginForm = document.querySelector('#login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (event) => handleFormSubmission(event, 'http://127.0.0.1:5000/api/login'));
     }
 
     // Attach event listener for signup form
-    const signupForm = document.querySelector('#signup .auth-form');
+    const signupForm = document.querySelector('#signup-form');
     if (signupForm) {
         signupForm.addEventListener('submit', (event) => handleFormSubmission(event, 'http://127.0.0.1:5000/api/signup'));
     }

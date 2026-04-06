@@ -20,6 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reset-btn').addEventListener('click', handleReset);
     document.getElementById('toast-close').addEventListener('click', hideToast);
 
+    // Active nav highlighting
+    const current = window.location.pathname.split('/').pop() || '';
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href !== '#' && current.includes(href.replace('.html', ''))) {
+            a.style.color = 'var(--accent-light, #a78bfa)';
+            a.style.fontWeight = '700';
+        }
+    });
+
     // Pre-fill skill from analyze page (when user clicks a skill card there)
     const prefill = sessionStorage.getItem('roadmap_prefill');
     if (prefill) {
@@ -270,6 +280,7 @@ function hideToast() {
 }
 
 function handleLogout() {
+    if(!confirm('Are you sure you want to log out?')) return;
     localStorage.removeItem('user_id');
     window.location.href = 'index.html';
 }
@@ -287,3 +298,4 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+

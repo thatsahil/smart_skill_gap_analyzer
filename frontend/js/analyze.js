@@ -1,16 +1,38 @@
 // =============================================
-//  Analyze Page — Skill Gap Analysis JS
+//  Analyze Page — Skill Gap Analysis JS (Phase 2)
 // =============================================
 
 const BACKEND = 'http://127.0.0.1:5000';
+const _userId   = localStorage.getItem('user_id');
+const _userType = localStorage.getItem('user_type');
 
-// ── Auth guard ─────────────────────────────────────────────────────────
+// ── Auth guard & boot ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    const userId = localStorage.getItem('user_id');
-    if (!userId) { window.location.href = 'login.html'; return; }
+    if (!_userId) { window.location.href = 'login.html'; return; }
 
-    // Logout
+    // Active nav highlighting
+    const current = window.location.pathname.split('/').pop() || 'analyze.html';
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href !== '#' && current.includes(href.replace('.html', ''))) {
+            a.style.color = 'var(--accent-light, #a78bfa)';
+            a.style.fontWeight = '700';
+        }
+    });
+
+    // Inject 'My Reports' nav link for candidates
+    if (_userType !== 'company') {
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks && !document.querySelector('a[href="reports.html"]')) {
+            const link = document.createElement('a');
+            link.href = 'reports.html';
+            link.textContent = 'My Reports';
+            navLinks.insertBefore(link, navLinks.querySelector('#logout-btn'));
+        }
+    }
+
     document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+        if(!confirm('Are you sure you want to log out?')) return;
         e.preventDefault();
         localStorage.clear();
         window.location.href = 'index.html';
@@ -19,10 +41,37 @@ document.addEventListener('DOMContentLoaded', () => {
     initDropZones();
     initTabs();
     loadJobPostings();
+    checkStoredResume();
 
     document.getElementById('analyze-btn').addEventListener('click', runAnalysis);
+
     document.getElementById('new-analysis-btn')?.addEventListener('click', resetPage);
+    document.getElementById('save-report-btn')?.addEventListener('click', saveReport);
+    document.getElementById('export-btn')?.addEventListener('click', () => window.print());
 });
+
+// ── Auto-fill stored resume ────────────────────────────────────────────
+async function checkStoredResume() {
+    if (!_userId) return;
+    try {
+        const res  = await fetch(`${BACKEND}/api/resume?user_id=${_userId}`);
+        const data = await res.json();
+        if (data.exists) showStoredResumeState();
+    } catch (_) { /* silent */ }
+}
+
+function showStoredResumeState() {
+    const content = document.getElementById('resume-drop-content');
+    const info    = document.getElementById('resume-file-info');
+    const nameEl  = document.getElementById('resume-file-name');
+    const sizeEl  = document.getElementById('resume-file-size');
+    if (!content || !info) return;
+    nameEl.textContent = 'Stored resume (from profile)';
+    sizeEl.textContent = 'Click Browse to replace with a different file';
+    content.classList.add('hidden');
+    info.classList.remove('hidden');
+    document.getElementById('resume-drop').dataset.useStored = 'true';
+}
 
 // ── Drag & Drop ────────────────────────────────────────────────────────
 function initDropZones() {
@@ -31,20 +80,19 @@ function initDropZones() {
     setupDrop('jd-drop', 'jd-input', 'jd-drop-content', 'jd-file-info',
         'jd-file-name', 'jd-file-size', 'jd-remove', '.pdf');
 
-    // Character counter for textarea
     const ta = document.getElementById('jd-textarea');
     const cc = document.getElementById('jd-char-count');
     ta?.addEventListener('input', () => { cc.textContent = ta.value.length; });
 }
 
 function setupDrop(zoneId, inputId, contentId, infoId, nameId, sizeId, removeId, ext) {
-    const zone = document.getElementById(zoneId);
-    const input = document.getElementById(inputId);
-    const content = document.getElementById(contentId);
-    const info = document.getElementById(infoId);
-    const nameEl = document.getElementById(nameId);
-    const sizeEl = document.getElementById(sizeId);
-    const removeBtn = document.getElementById(removeId);
+    const zone     = document.getElementById(zoneId);
+    const input    = document.getElementById(inputId);
+    const content  = document.getElementById(contentId);
+    const info     = document.getElementById(infoId);
+    const nameEl   = document.getElementById(nameId);
+    const sizeEl   = document.getElementById(sizeId);
+    const removeBtn= document.getElementById(removeId);
 
     if (!zone || !input) return;
 
@@ -70,6 +118,10 @@ function setupDrop(zoneId, inputId, contentId, infoId, nameId, sizeId, removeId,
         input.value = '';
         content.classList.remove('hidden');
         info.classList.add('hidden');
+        // If removing from resume zone, clear stored flag too
+        if (zoneId === 'resume-drop') {
+            delete zone.dataset.useStored;
+        }
     });
 }
 
@@ -78,7 +130,6 @@ function applyFile(file, input, content, info, nameEl, sizeEl, ext) {
         showError(`Only ${ext.toUpperCase()} files are accepted.`);
         return;
     }
-    // Transfer to a new DataTransfer so the input picks it up
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
@@ -88,10 +139,12 @@ function applyFile(file, input, content, info, nameEl, sizeEl, ext) {
     content.classList.add('hidden');
     info.classList.remove('hidden');
 
-    // Visual feedback
     input.closest('.drop-zone').style.borderColor = '#10b981';
-    input.closest('.drop-zone').style.background = 'rgba(16, 185, 129, 0.05)';
+    input.closest('.drop-zone').style.background  = 'rgba(16, 185, 129, 0.05)';
     showError('✅ PDF uploaded successfully: ' + file.name, true);
+
+    // Clear stored-resume flag if user manually picks a file
+    input.closest('.drop-zone').dataset.useStored = 'false';
 }
 
 function formatBytes(bytes) {
@@ -115,10 +168,10 @@ function initTabs() {
 
 // ── Load Job Postings ──────────────────────────────────────────────────
 async function loadJobPostings() {
-    const info = document.querySelector('.job-select-info');
+    const info      = document.querySelector('.job-select-info');
     const container = document.getElementById('job-list-container');
     try {
-        const res = await fetch(`${BACKEND}/api/jobs`);
+        const res  = await fetch(`${BACKEND}/api/jobs`);
         const jobs = await res.json();
         if (!res.ok || !Array.isArray(jobs) || jobs.length === 0) {
             info.textContent = 'No job postings available yet.';
@@ -128,9 +181,9 @@ async function loadJobPostings() {
         container.classList.remove('hidden');
         jobs.forEach(job => {
             const div = document.createElement('div');
-            div.className = 'job-option';
+            div.className  = 'job-option';
             div.dataset.id = job._id;
-            div.innerHTML = `<h4>${job.title}</h4><p>${job.company_name || 'Unknown Company'}</p>`;
+            div.innerHTML  = `<h4>${job.title}</h4><p>${job.company_name || 'Unknown Company'}</p>`;
             div.addEventListener('click', () => {
                 document.querySelectorAll('.job-option').forEach(o => o.classList.remove('selected'));
                 div.classList.add('selected');
@@ -144,18 +197,27 @@ async function loadJobPostings() {
 }
 
 // ── Run Analysis ───────────────────────────────────────────────────────
+let _lastAnalysisData = null;
+
 async function runAnalysis() {
     const resumeInput = document.getElementById('resume-input');
-    if (!resumeInput.files[0]) {
+    const resumeDrop  = document.getElementById('resume-drop');
+    const useStored   = resumeDrop?.dataset.useStored === 'true';
+
+    if (!resumeInput.files[0] && !useStored) {
         showError('Please upload your resume PDF first.');
         return;
     }
 
     const activeTab = document.querySelector('.jd-tab.active')?.dataset.tab;
     let hasJD = false;
-    if (activeTab === 'text' && document.getElementById('jd-textarea').value.trim()) hasJD = true;
-    if (activeTab === 'pdf' && document.getElementById('jd-input').files[0]) hasJD = true;
-    if (activeTab === 'job' && document.getElementById('selected-job-id').value) hasJD = true;
+    let jdSnippet = '';
+    if (activeTab === 'text' && document.getElementById('jd-textarea').value.trim()) {
+        hasJD     = true;
+        jdSnippet = document.getElementById('jd-textarea').value.trim().slice(0, 160);
+    }
+    if (activeTab === 'pdf' && document.getElementById('jd-input').files[0])        hasJD = true;
+    if (activeTab === 'job' && document.getElementById('selected-job-id').value)    hasJD = true;
 
     if (!hasJD) {
         showError('Please provide a job description (text, PDF, or select a posted job).');
@@ -166,7 +228,21 @@ async function runAnalysis() {
     setStep(1);
 
     const formData = new FormData();
-    formData.append('resume', resumeInput.files[0]);
+
+    if (resumeInput.files[0]) {
+        formData.append('resume', resumeInput.files[0]);
+    } else if (useStored && _userId) {
+        try {
+            const r = await fetch(`${BACKEND}/api/resume/download?user_id=${_userId}`);
+            if (!r.ok) throw new Error();
+            const blob = await r.blob();
+            formData.append('resume', new File([blob], 'stored_resume.pdf', { type: 'application/pdf' }));
+        } catch {
+            showError('Could not load stored resume. Please upload manually.');
+            showLoading(false);
+            return;
+        }
+    }
 
     if (activeTab === 'text') {
         formData.append('jd_text', document.getElementById('jd-textarea').value.trim());
@@ -176,14 +252,12 @@ async function runAnalysis() {
         formData.append('job_id', document.getElementById('selected-job-id').value);
     }
 
-    // Simulate step progress during request
     const step2Timer = setTimeout(() => setStep(2), 3500);
     const step3Timer = setTimeout(() => setStep(3), 8000);
 
     try {
-        const res = await fetch(`${BACKEND}/api/analyze`, { method: 'POST', body: formData });
+        const res  = await fetch(`${BACKEND}/api/analyze`, { method: 'POST', body: formData });
         const data = await res.json();
-
         clearTimeout(step2Timer);
         clearTimeout(step3Timer);
 
@@ -193,14 +267,55 @@ async function runAnalysis() {
             return;
         }
 
+        data._jdSnippet   = jdSnippet;
+        _lastAnalysisData = data;
         showLoading(false);
         renderResults(data);
     } catch (err) {
         clearTimeout(step2Timer);
         clearTimeout(step3Timer);
-        console.error("Fetch API error:", err);
+        console.error('Fetch API error:', err);
         showError('Could not reach the server. Make sure you are accessing the site via http://127.0.0.1:5000/ and the backend is running.');
         showLoading(false);
+    }
+}
+
+
+
+// ── Save Report ────────────────────────────────────────────────────────
+async function saveReport() {
+    if (!_lastAnalysisData) { showError('Run an analysis first before saving.'); return; }
+    if (!_userId)           { showError('You must be logged in to save reports.'); return; }
+
+    const btn = document.getElementById('save-report-btn');
+    btn.textContent = '🔄 Saving…';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${BACKEND}/api/save-report`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                user_id:     _userId,
+                skills:      _lastAnalysisData.skills,
+                sbert_gaps:  _lastAnalysisData.sbert_gaps,
+                gap_count:   _lastAnalysisData.gap_count,
+                job_snippet: _lastAnalysisData._jdSnippet || '',
+            })
+        });
+        if (res.ok) {
+            showError('✅ Report saved! View it in My Reports.', true);
+            btn.textContent = '✅ Saved';
+        } else {
+            const d = await res.json();
+            showError(d.message || 'Failed to save report.');
+            btn.textContent = '💾 Save Report';
+            btn.disabled = false;
+        }
+    } catch (_) {
+        showError('Could not connect to server.');
+        btn.textContent = '💾 Save Report';
+        btn.disabled = false;
     }
 }
 
@@ -208,20 +323,26 @@ async function runAnalysis() {
 function renderResults(data) {
     const { skills, gap_count, sbert_used, sbert_gaps = [] } = data;
 
-    // ── Meta line ──────────────────────────────────────────────────────
+    // Reset save button
+    const saveBtn = document.getElementById('save-report-btn');
+    if (saveBtn) { saveBtn.textContent = '💾 Save Report'; saveBtn.disabled = false; }
+
+    // ── Meta line
     document.getElementById('results-meta').textContent =
         `${skills.length} skill gaps identified · ` +
         (sbert_used
             ? `${gap_count} semantic mismatches detected via SBERT`
             : 'AI-powered analysis (SBERT not available)');
 
-    // ── SBERT Semantic Mismatches Panel ───────────────────────────────
+    // ── Match score callout (computed from SBERT gap similarities)
+    renderMatchScore(sbert_gaps, sbert_used);
+
+    // ── SBERT Semantic Mismatches Panel
     const sbertPanel = document.getElementById('sbert-panel');
     if (sbertPanel) {
         sbertPanel.innerHTML = '';
         if (sbert_used && sbert_gaps.length > 0) {
             sbertPanel.classList.remove('hidden');
-
             const header = document.createElement('div');
             header.className = 'sbert-header';
             header.innerHTML = `
@@ -233,13 +354,11 @@ function renderResults(data) {
 
             const list = document.createElement('div');
             list.className = 'sbert-gap-list';
-
             sbert_gaps.forEach((gap, i) => {
-                const pct = Math.round((1 - gap.similarity) * 100);  // gap severity %
-                const sim = Math.round(gap.similarity * 100);
+                const pct   = Math.round((1 - gap.similarity) * 100);
+                const sim   = Math.round(gap.similarity * 100);
                 const color = sim < 25 ? '#ef4444' : sim < 45 ? '#f97316' : '#eab308';
-
-                const item = document.createElement('div');
+                const item  = document.createElement('div');
                 item.className = 'sbert-gap-item';
                 item.style.animationDelay = (i * 60) + 'ms';
                 item.innerHTML = `
@@ -254,7 +373,6 @@ function renderResults(data) {
                 `;
                 list.appendChild(item);
             });
-
             sbertPanel.appendChild(list);
         } else if (sbert_used && sbert_gaps.length === 0) {
             sbertPanel.classList.remove('hidden');
@@ -269,7 +387,7 @@ function renderResults(data) {
         }
     }
 
-    // ── Enriched skill cards (Gemini) ─────────────────────────────────
+    // ── Enriched skill cards
     const grid = document.getElementById('skills-grid');
     grid.innerHTML = '';
 
@@ -289,7 +407,6 @@ function renderResults(data) {
             `<a class="resource-link" href="${r.url}" target="_blank" rel="noopener">${r.label}</a>`
         ).join('');
 
-        // Show similarity badge if available
         const simBadge = (item.similarity !== null && item.similarity !== undefined)
             ? `<span class="skill-sim-badge">SBERT: ${Math.round(item.similarity * 100)}% match</span>`
             : '';
@@ -317,6 +434,42 @@ function renderResults(data) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── Match Score Ring Callout ───────────────────────────────────────────
+function renderMatchScore(sbert_gaps, sbert_used) {
+    const callout = document.getElementById('match-score-callout');
+    if (!callout) return;
+
+    if (!sbert_used || sbert_gaps.length === 0) {
+        callout.classList.add('hidden');
+        return;
+    }
+
+    // Average similarity of detected gaps = coverage score
+    const avgSim  = sbert_gaps.reduce((s, g) => s + g.similarity, 0) / sbert_gaps.length;
+    const scorePct = Math.max(0, Math.min(100, Math.round(avgSim * 100)));
+    const label   = scorePct >= 70 ? 'Great Match' : scorePct >= 50 ? 'Good Match' : scorePct >= 35 ? 'Partial Match' : 'Low Match';
+    const color   = scorePct >= 70 ? '#10b981' : scorePct >= 50 ? '#f59e0b' : scorePct >= 35 ? '#f97316' : '#ef4444';
+
+    const circumference = 2 * Math.PI * 26; // ≈163.36
+    const offset = circumference - (scorePct / 100) * circumference;
+
+    const ring = document.getElementById('match-ring-fill');
+    if (ring) {
+        ring.style.strokeDasharray  = circumference;
+        ring.style.strokeDashoffset = offset;
+        ring.style.stroke           = color;
+        ring.style.transition       = 'stroke-dashoffset 1s ease';
+    }
+
+    const ringLabel = document.getElementById('match-ring-label');
+    if (ringLabel) ringLabel.textContent = scorePct + '%';
+
+    const scoreLabel = document.getElementById('match-score-label');
+    if (scoreLabel) { scoreLabel.textContent = label; scoreLabel.style.color = color; }
+
+    callout.classList.remove('hidden');
+}
+
 function escapeHtml(str) {
     return String(str)
         .replace(/&/g, '&amp;')
@@ -329,33 +482,30 @@ function escapeHtml(str) {
 let currentStep = 0;
 
 function setStep(n) {
-    const steps = ['step-1', 'step-2', 'step-3'];
+    const steps  = ['step-1', 'step-2', 'step-3'];
     const labels = ['Extracting text from PDF…', 'Running SBERT analysis…', 'Generating AI recommendations…'];
     document.getElementById('loading-status').textContent = labels[n - 1] || '';
     steps.forEach((id, idx) => {
         const el = document.getElementById(id);
         if (!el) return;
-        if (idx + 1 < n) { el.className = 'step done'; }
+        if (idx + 1 < n)      { el.className = 'step done'; }
         else if (idx + 1 === n) { el.className = 'step active'; }
-        else { el.className = 'step'; }
+        else                   { el.className = 'step'; }
     });
     currentStep = n;
 }
 
 function showLoading(show) {
     const overlay = document.getElementById('loading-overlay');
-    if (show) {
-        overlay.classList.remove('hidden');
-        setStep(1);
-    } else {
-        overlay.classList.add('hidden');
-    }
+    if (show) { overlay.classList.remove('hidden'); setStep(1); }
+    else      { overlay.classList.add('hidden'); }
 }
 
 // ── Reset ──────────────────────────────────────────────────────────────
 function resetPage() {
     document.querySelector('.analyze-section').classList.remove('hidden');
     document.getElementById('results-section').classList.add('hidden');
+    _lastAnalysisData = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -366,16 +516,17 @@ function showError(msg, isSuccess = false) {
 
     if (isSuccess) {
         toast.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        toast.style.background = 'rgba(16, 185, 129, 0.12)';
-        toast.style.color = '#34d399';
-        toast.querySelector('.toast-icon').textContent = '';
+        toast.style.background  = 'rgba(16, 185, 129, 0.12)';
+        toast.style.color       = '#34d399';
+        toast.querySelector('.toast-icon').textContent = '✅';
     } else {
         toast.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-        toast.style.background = 'rgba(239, 68, 68, 0.12)';
-        toast.style.color = '#fca5a5';
+        toast.style.background  = 'rgba(239, 68, 68, 0.12)';
+        toast.style.color       = '#fca5a5';
         toast.querySelector('.toast-icon').textContent = '⚠️';
     }
 
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('hidden'), 4000);
 }
+

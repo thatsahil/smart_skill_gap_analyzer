@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Gap Analyzer - Profile</title>
+    <meta name="theme-color" content="#09090b">
+    <meta name="description" content="Manage your profile, update your information, and upload your stored resume.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Profile — Skill Gap Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
     <header>
-        <nav>
+                        <nav>
             <div class="logo">Skill Gap Analyzer</div>
             <div class="nav-links">
-                <a href="index.html">About</a>
                 <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
                 <a href="profile.html">Profile</a>
                 <a href="#" id="logout-btn">Logout</a>
             </div>
@@ -28,6 +35,41 @@
 
                 <!-- Candidate Profile Form -->
                 <div id="candidate-profile" style="display: none;" class="profile-panel">
+
+                    <!-- Resume Upload Section -->
+                    <div class="resume-section">
+                        <h3 class="section-label">Stored Resume</h3>
+                        <div id="resume-stored-state" class="hidden">
+                            <div class="resume-stored-card">
+                                <span class="resume-file-icon">📄</span>
+                                <div class="resume-file-meta">
+                                    <p id="stored-resume-name">resume.pdf</p>
+                                    <span id="stored-resume-date" class="resume-sub"></span>
+                                </div>
+                                <div class="resume-actions">
+                                    <a id="download-resume-btn" href="#" class="btn-link">⬇ Download</a>
+                                    <button id="replace-resume-btn" class="btn-link">↺ Replace</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="resume-upload-state">
+                            <div class="resume-dropzone" id="profile-resume-drop">
+                                <input type="file" id="profile-resume-input" accept=".pdf" hidden>
+                                <div class="resume-drop-content" id="profile-drop-content">
+                                    <div style="font-size:2rem;margin-bottom:8px;">☁️</div>
+                                    <p>Drag & drop your resume PDF here</p>
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('profile-resume-input').click()">Browse Files</button>
+                                </div>
+                                <div class="hidden" id="profile-file-selected">
+                                    <span>📋</span>
+                                    <p id="profile-file-name"></p>
+                                    <button class="btn" id="upload-resume-btn" style="width:auto;padding:8px 18px;">Upload</button>
+                                </div>
+                            </div>
+                            <p class="resume-hint">Once uploaded, your resume will auto-fill on the Analyze page.</p>
+                        </div>
+                    </div>
+
                     <form id="candidate-profile-form">
                         <div class="form-group">
                             <label for="cand-name">Full Name:</label>
@@ -97,5 +139,10 @@
     </footer>
 
     <script src="js/profile.js"></script>
+
+    <script src="js/chat-widget.js"></script>
 </body>
 </html>
+
+
+

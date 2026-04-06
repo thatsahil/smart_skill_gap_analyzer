@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Gap Analyzer - Dashboard</title>
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Dashboard — Skill Gap Analyzer</title>
+    <meta name="description" content="Manage your job analyses, applications, and skill roadmaps from your personal dashboard.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
     <header>
-        <nav>
+                        <nav>
             <div class="logo">Skill Gap Analyzer</div>
             <div class="nav-links">
-                <a href="index.html">About</a>
                 <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
                 <a href="profile.html">Profile</a>
                 <a href="#" id="logout-btn">Logout</a>
             </div>
@@ -21,112 +28,134 @@
     </header>
 
     <main>
-        <section id="dashboard" class="hero">
+        <!-- Dashboard Hero -->
+        <section class="dashboard-hero">
             <div class="container">
-                <h1 id="welcome-message">Welcome to your Dashboard!</h1>
-
-                <!-- Candidate Dashboard Section -->
-                <div id="candidate-dashboard" style="display: none;">
-                    <p style="color: var(--text-muted); margin-top: 8px;">Manage your job applications, analyze skills, and find learning resources.</p>
-
-                    <div class="dashboard-features">
-                        <div class="feature-item" id="analyze-jobs-card">
-                            <h3>Analyze Job Descriptions</h3>
-                            <p>Upload job descriptions to extract key skills and requirements automatically.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>Manage Resumes</h3>
-                            <p>Upload and manage your resumes for semantic matching with job requirements.</p>
-                        </div>
-                        <div class="feature-item" id="skill-gap-reports-card">
-                            <h3>View Skill Gap Reports</h3>
-                            <p>Access personalized reports highlighting your skill gaps and recommended learning paths.</p>
-                        </div>
-                        <div class="feature-item" id="explore-jobs-card-cand">
-                            <h3>Explore Job Openings</h3>
-                            <p>Browse through the latest job opportunities from various companies.</p>
-                        </div>
-                    </div>
-
-                    <div class="cta-buttons">
-                        <a href="#" class="btn">Start New Analysis</a>
-                        <a href="skill-gap-reports.html" class="btn secondary-btn">View My Roadmap</a>
-                    </div>
-                </div>
-
-                <!-- Company Dashboard Section -->
-                <div id="company-dashboard" style="display: none;">
-                    <p style="color: var(--text-muted); margin-top: 8px;">Manage your job postings and find the best candidates.</p>
-
-                    <div class="dashboard-features">
-                        <div class="feature-item">
-                            <h3>Post a New Job</h3>
-                            <p>Create and publish new job openings to attract potential candidates.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>View Applications</h3>
-                            <p>Review and manage applications received for your posted jobs.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>Manage Job Postings</h3>
-                            <p>Edit or close existing job openings.</p>
-                        </div>
-                        <div class="feature-item" id="explore-jobs-card-comp">
-                            <h3>Explore Job Openings</h3>
-                            <p>See what other companies are posting in the market.</p>
-                        </div>
-                    </div>
-
-                    <div class="cta-buttons">
-                        <a href="#" class="btn" id="show-post-job-form">Post a New Job</a>
-                        <a href="#" class="btn secondary-btn">View Applications</a>
-                    </div>
-
-                    <!-- Post Job Form (Initially Hidden) -->
-                    <div id="post-job-section" style="display: none;" class="post-job-panel">
-                        <h3>Post a New Job</h3>
-                        <form id="post-job-form">
-                            <div class="form-group">
-                                <label for="job-title">Job Title:</label>
-                                <input type="text" id="job-title" name="title" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="job-description">Job Description:</label>
-                                <textarea id="job-description" name="description" rows="5" required></textarea>
-                            </div>
-                            <button type="submit" class="btn">Publish Job</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Job Listings Panel (visible to everyone) -->
-                <div class="jobs-panel" id="job-listings-card">
-                    <div class="jobs-panel-header">
-                        <h2>Job Postings</h2>
-                        <div class="jobs-search-row">
-                            <input type="text" id="job-search" placeholder="Search by title or company…">
-                            <select id="job-sort">
-                                <option value="newest">Newest First</option>
-                                <option value="title-asc">Title (A–Z)</option>
-                                <option value="title-desc">Title (Z–A)</option>
-                                <option value="company-asc">Company (A–Z)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="jobs-list">
-                        <!-- Jobs loaded via JS -->
+                <div class="dashboard-header">
+                    <div>
+                        <h1 id="welcome-message">Dashboard</h1>
+                        <p id="dashboard-sub" style="color:var(--text-2);margin-top:6px;font-size:0.9rem;"></p>
                     </div>
                 </div>
             </div>
         </section>
+
+        <div class="container" style="padding-top:36px;">
+
+            <!-- ── Candidate Dashboard ── -->
+            <div id="candidate-dashboard" style="display:none;">
+
+                <!-- Quick action cards -->
+                <div class="dashboard-features-section">
+                    <h2>Quick Actions</h2>
+                    <div class="dashboard-features">
+                        <div class="feature-item" id="analyze-jobs-card">
+                            <h3>Analyze Job Descriptions</h3>
+                            <p>Upload your resume and a job description to get a semantic skill gap report.</p>
+                        </div>
+                        <div class="feature-item" id="manage-resumes-card">
+                            <h3>Manage Resume</h3>
+                            <p>Upload and update your stored resume for one-click analysis autofill.</p>
+                        </div>
+                        <div class="feature-item" id="skill-gap-reports-card">
+                            <h3>Learning Roadmap</h3>
+                            <p>Build a step-by-step roadmap for any skill you want to develop.</p>
+                        </div>
+                        <div class="feature-item" id="explore-jobs-card-cand">
+                            <h3>Explore Jobs</h3>
+                            <p>Browse open positions and check your fit score before applying.</p>
+                        </div>
+                    </div>
+
+                    <!-- CTA row -->
+                    <div class="cta-buttons" style="margin-top:28px;">
+                        <a href="analyze.html" class="btn" style="width:auto;min-width:160px;">Start New Analysis</a>
+                        <a href="skill-gap-reports.html" class="btn secondary-btn" style="width:auto;min-width:160px;">Learning Roadmap</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Company Dashboard ── -->
+            <div id="company-dashboard" style="display:none;">
+
+                <div class="dashboard-features-section">
+                    <h2>Quick Actions</h2>
+                    <div class="dashboard-features">
+                        <div class="feature-item" id="post-job-card">
+                            <h3>Post a New Job</h3>
+                            <p>Create and publish a new job opening to attract candidates.</p>
+                        </div>
+                        <div class="feature-item" id="view-apps-card">
+                            <h3>View Applications</h3>
+                            <p>Review applicants for your posted job listings.</p>
+                        </div>
+                        <div class="feature-item" id="manage-postings-card">
+                            <h3>Manage Postings</h3>
+                            <p>Edit or remove existing job listings.</p>
+                        </div>
+                        <div class="feature-item" id="explore-jobs-card-comp">
+                            <h3>Market Overview</h3>
+                            <p>See what other companies are posting to stay competitive.</p>
+                        </div>
+                    </div>
+
+                    <div class="cta-buttons" style="margin-top:28px;">
+                        <a href="#" class="btn" id="show-post-job-form" style="width:auto;min-width:160px;">Post a Job</a>
+                        <a href="#" class="btn secondary-btn" id="view-apps-btn" style="width:auto;min-width:160px;">View Applications</a>
+                    </div>
+
+                    <!-- Post Job Form -->
+                    <div id="post-job-section" style="display:none;" class="post-job-panel">
+                        <div style="background:var(--bg-surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:32px;max-width:540px;margin-top:28px;">
+                            <h3 style="font-size:1rem;font-weight:700;margin-bottom:20px;">Post a New Job</h3>
+                            <form id="post-job-form">
+                                <div class="form-group">
+                                    <label for="job-title">Job Title</label>
+                                    <input type="text" id="job-title" name="title" placeholder="e.g. Senior ML Engineer" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="job-description">Job Description</label>
+                                    <textarea id="job-description" name="description" rows="6" placeholder="Describe the role, responsibilities, and required skills…" required></textarea>
+                                </div>
+                                <button type="submit" class="btn" style="margin-top:4px;">Publish Job</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Job Listings (both roles) ── -->
+            <div class="jobs-section" id="job-listings-card">
+                <div class="jobs-section-header">
+                    <h2>Job Postings</h2>
+                </div>
+                <div class="jobs-search-row">
+                    <input type="text" id="job-search" placeholder="Search by title or company…">
+                    <select id="job-sort">
+                        <option value="newest">Newest First</option>
+                        <option value="title-asc">Title (A–Z)</option>
+                        <option value="title-desc">Title (Z–A)</option>
+                        <option value="company-asc">Company (A–Z)</option>
+                    </select>
+                </div>
+                <div id="jobs-list" class="jobs-grid">
+                    <!-- Jobs loaded by dashboard.js -->
+                </div>
+            </div>
+
+        </div><!-- /.container -->
     </main>
 
     <footer>
         <div class="container">
-            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+            <p>© 2026 Skill Gap Analyzer</p>
         </div>
     </footer>
 
     <script src="js/dashboard.js"></script>
+
+    <script src="js/chat-widget.js"></script>
 </body>
 </html>
+
+

@@ -6,3 +6,4 @@ requests
 pdfplumber
 sentence-transformers
 nltk
+python-dotenv

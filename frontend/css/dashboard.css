@@ -1,195 +1,478 @@
-/* =============================================
-   Dashboard & Profile — Dark Theme Styles
-   ============================================= */
+/* =====================================================================
+   Dashboard — Premium Dark Styles v3
+   ===================================================================== */
 
-/* ---------- Dashboard hero override ---------- */
-#dashboard, #profile-section {
-    padding: 60px 0 80px;
+/* ─── Dashboard Hero ─────────────────────────────────────────────────── */
+.dashboard-hero {
+    padding: 52px 0 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
 }
 
-/* ---------- Job Listings Card ---------- */
-.jobs-panel {
-    margin-top: 40px;
-    background: var(--bg-card, rgba(22,27,34,0.9));
-    border: 1px solid var(--border, rgba(255,255,255,0.10));
-    border-radius: 16px;
-    padding: 28px;
-    backdrop-filter: blur(12px);
+.dashboard-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 80% at 20% 50%, rgba(124,106,247,0.05) 0%, transparent 70%);
+    pointer-events: none;
 }
 
-.jobs-panel-header {
+.dashboard-header {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: center;
+    gap: var(--space-6);
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.10));
 }
 
-.jobs-panel-header h2 {
-    font-size: 1.4rem;
+.dashboard-header h1 {
+    font-size: 1.8rem;
     font-weight: 700;
-    color: #f0f6fc;
-    margin: 0;
+    color: var(--text-1);
+    letter-spacing: -0.025em;
+    margin-bottom: var(--space-2);
 }
 
+.dashboard-header p {
+    font-size: 0.9rem;
+    color: var(--text-2);
+    max-width: 460px;
+}
+
+/* ─── Stats Row ──────────────────────────────────────────────────────── */
+.stats-row {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-pill);
+    background: var(--bg-raised);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-2);
+}
+
+.stat-pill .stat-val { color: var(--text-1); font-weight: 700; }
+
+/* ─── Feature Cards (quick action grid) ─────────────────────────────── */
+.dashboard-features-section {
+    padding: var(--space-8) 0 var(--space-6);
+}
+
+.dashboard-features-section h2 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-3);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-4);
+}
+
+.feature-item[id] { cursor: pointer; }
+
+.feature-item[id]:hover h3 {
+    color: var(--accent-light);
+}
+
+/* Feature icon */
+.feature-icon {
+    font-size: 1.2rem;
+    width: 40px; height: 40px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+
+/* ─── Jobs Panel ─────────────────────────────────────────────────────── */
+.jobs-section { padding: var(--space-6) 0 var(--space-12); }
+
+.jobs-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    flex-wrap: wrap;
+}
+
+.jobs-section-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.01em;
+}
+
+/* ─── Search / Sort Row ──────────────────────────────────────────────── */
 .jobs-search-row {
     display: flex;
-    gap: 10px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
     flex-wrap: wrap;
+    align-items: center;
 }
 
-.jobs-search-row input,
+.jobs-search-row input {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px var(--space-3);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    font-size: 0.875rem;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.jobs-search-row input::placeholder { color: var(--text-3); }
+
+.jobs-search-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
 .jobs-search-row select {
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    color: #f0f6fc;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    transition: border-color 0.2s;
+    padding: 9px var(--space-3);
+    padding-right: 32px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2352525b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.15s;
 }
 
-.jobs-search-row input:focus,
 .jobs-search-row select:focus {
     outline: none;
-    border-color: #28a745;
-    box-shadow: 0 0 0 3px rgba(40,167,69,0.3);
+    border-color: var(--accent);
 }
 
-.jobs-search-row input::placeholder { color: #6e7681; }
-.jobs-search-row select option { background: #1c2128; }
+.jobs-search-row select option { background: var(--bg-raised); color: var(--text-1); }
 
-/* ---------- Job Cards Grid ---------- */
-#jobs-list {
+/* ─── Job Cards Grid ─────────────────────────────────────────────────── */
+.jobs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-4);
 }
 
+/* ─── Job Card ───────────────────────────────────────────────────────── */
 .job-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.25s ease;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    animation: fadeUp 0.3s ease both;
+    position: relative;
+    overflow: hidden;
 }
 
 .job-card:hover {
-    border-color: rgba(74,222,128,0.3);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    border-color: var(--border-md);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .job-card h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #f0f6fc;
-    margin-bottom: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-1);
+    margin-bottom: var(--space-1);
+    letter-spacing: -0.01em;
 }
 
 .job-card .company {
-    font-size: 0.85rem;
-    color: #4ade80;
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-size: 0.78rem;
+    color: var(--text-3);
+    margin-bottom: var(--space-3);
+    font-weight: 500;
 }
 
 .job-card p {
-    font-size: 0.85rem;
-    color: #8b949e;
+    font-size: 0.82rem;
+    color: var(--text-2);
     line-height: 1.6;
-    margin-bottom: 14px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-bottom: var(--space-4);
 }
 
-.job-card .delete-btn {
-    background: rgba(239,68,68,0.15);
-    border: 1px solid rgba(239,68,68,0.35);
-    color: #fca5a5;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-family: 'Inter', sans-serif;
+/* Delete job icon button */
+.delete-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-xs);
+    color: var(--text-3);
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
 }
 
-.job-card .delete-btn:hover {
-    background: rgba(239,68,68,0.3);
+.delete-btn:hover {
+    background: var(--red-dim);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
 }
 
-/* ---------- Post Job Form ---------- */
-.post-job-panel {
-    margin-top: 30px;
-    background: var(--bg-card, rgba(22,27,34,0.9));
-    border: 1px solid var(--border, rgba(255,255,255,0.10));
-    border-radius: 16px;
-    padding: 28px;
-    text-align: left;
+/* ─── Check Fit + Apply Buttons ──────────────────────────────────────── */
+.job-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
 }
 
-.post-job-panel h3 {
-    font-size: 1.2rem;
+.score-chip-area { min-height: 0; }
+
+.btn-check-fit {
+    flex: 1 1 auto;
+    padding: 6px 12px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(124,106,247,0.25);
+    border-radius: var(--radius-sm);
+    color: var(--accent-light);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btn-check-fit:hover {
+    background: rgba(124,106,247,0.22);
+    border-color: var(--accent);
+}
+
+.btn-check-fit:disabled { opacity: 0.5; cursor: default; }
+
+.btn-apply {
+    flex: 1 1 auto;
+    padding: 6px 12px;
+    background: var(--green-dim);
+    border: 1px solid rgba(34,197,94,0.25);
+    border-radius: var(--radius-sm);
+    color: #86efac;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btn-apply:hover {
+    background: rgba(34,197,94,0.18);
+    border-color: rgba(34,197,94,0.45);
+}
+
+.btn-apply.applied, .btn-apply:disabled {
+    opacity: 0.5;
+    cursor: default;
+    background: transparent;
+}
+
+/* ─── Score Chips ────────────────────────────────────────────────────── */
+.score-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: var(--space-2);
+}
+
+.score-chip.great   { background: var(--green-dim);  border: 1px solid rgba(34,197,94,0.25);  color: #86efac; }
+.score-chip.good    { background: var(--amber-dim);  border: 1px solid rgba(245,158,11,0.25); color: #fde68a; }
+.score-chip.partial { background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.25); color: #fdba74; }
+.score-chip.low     { background: var(--red-dim);    border: 1px solid rgba(239,68,68,0.25);  color: #fca5a5; }
+
+.applicant-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background: var(--accent-dim);
+    border: 1px solid rgba(124,106,247,0.2);
+    color: var(--accent-light);
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: var(--space-2);
+}
+
+/* ─── Skeleton Loaders ───────────────────────────────────────────────── */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-raised) 25%, rgba(255,255,255,0.03) 50%, var(--bg-raised) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: var(--radius-xs);
+}
+
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.skeleton-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    height: 180px;
+}
+
+/* ─── Post Job Modal ─────────────────────────────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9,9,11,0.8);
+    backdrop-filter: blur(6px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-5);
+}
+
+.modal-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius);
+    padding: var(--space-8);
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    animation: fadeUp 0.2s ease;
+}
+
+.modal-box h3 {
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #f0f6fc;
-    margin-bottom: 20px;
+    color: var(--text-1);
+    margin-bottom: var(--space-5);
+    letter-spacing: -0.01em;
 }
 
-/* ---------- Profile Forms ---------- */
-.profile-panel {
-    margin-top: 20px;
-    background: var(--bg-card, rgba(22,27,34,0.9));
-    border: 1px solid var(--border, rgba(255,255,255,0.10));
-    border-radius: 16px;
-    padding: 28px;
-    text-align: left;
-    backdrop-filter: blur(12px);
+/* ─── Resume Section in Profile ──────────────────────────────────────── */
+.resume-section {
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--border);
 }
 
-/* ---------- Danger Zone ---------- */
-.danger-zone {
-    margin-top: 50px;
-    border-top: 1px solid rgba(239,68,68,0.2);
-    padding-top: 30px;
+.section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: var(--space-3);
+    display: block;
+}
+
+.resume-stored-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+}
+
+.resume-file-icon { font-size: 1.5rem; flex-shrink: 0; }
+.resume-file-meta { flex: 1; }
+.resume-file-meta p { font-size: 0.875rem; font-weight: 600; color: var(--text-1); margin: 0 0 2px; }
+.resume-sub { font-size: 0.75rem; color: var(--text-3); }
+.resume-actions { display: flex; gap: var(--space-2); flex-shrink: 0; flex-wrap: wrap; }
+
+.btn-link {
+    background: none;
+    border: 1px solid var(--border-md);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: var(--radius-xs);
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-link:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: var(--border-lg);
+    color: var(--text-1);
+}
+
+.resume-dropzone {
+    border: 1px dashed var(--border-md);
+    border-radius: var(--radius-sm);
+    padding: var(--space-6) var(--space-5);
     text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
 }
 
-.danger-zone h3 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fca5a5;
-    margin-bottom: 10px;
+.resume-dropzone:hover, .resume-dropzone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-dim);
 }
 
-.danger-zone p {
-    color: #8b949e;
-    font-size: 0.9rem;
-    margin-bottom: 16px;
+.resume-drop-content p { color: var(--text-2); font-size: 0.875rem; margin: 0 0 var(--space-3); }
+.resume-hint { font-size: 0.75rem; color: var(--text-3); margin-top: var(--space-2); text-align: center; }
+
+#profile-file-selected {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.btn-danger {
-    background: rgba(239,68,68,0.15);
-    border: 1px solid rgba(239,68,68,0.4);
-    color: #fca5a5;
-    box-shadow: none;
-    width: auto;
-    padding: 10px 24px;
+#profile-file-selected span { font-size: 1.4rem; }
+#profile-file-name { font-size: 0.875rem; font-weight: 600; color: var(--text-1); margin: 0; }
+
+/* ─── Animations ─────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.btn-danger:hover {
-    background: rgba(239,68,68,0.3);
-    box-shadow: 0 4px 14px rgba(239,68,68,0.25);
-    transform: translateY(-1px);
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .dashboard-header { flex-direction: column; }
+    .jobs-grid { grid-template-columns: 1fr; }
+    .jobs-search-row { flex-direction: column; }
+    .jobs-search-row input, .jobs-search-row select { width: 100%; }
+    .dashboard-hero { padding: 36px 0 28px; }
 }
-
-/* ---------- Skill Gap Card (clickable) ---------- */
-.feature-item[id] { cursor: pointer; }
-.feature-item[id]:hover h3 { color: #86efac; }

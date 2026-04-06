@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Gap Analyzer - Analyze Job Description</title>
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Analyze — Skill Gap Analyzer</title>
     <meta name="description"
         content="Upload your resume and a job description for an AI-powered semantic skill gap analysis.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,11 +19,12 @@
 
 <body>
     <header>
-        <nav>
+                        <nav>
             <div class="logo">Skill Gap Analyzer</div>
             <div class="nav-links">
-                <a href="index.html">About</a>
                 <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
                 <a href="profile.html">Profile</a>
                 <a href="#" id="logout-btn">Logout</a>
             </div>
@@ -163,11 +166,35 @@
                         <h2>Your Skill Gap Report</h2>
                         <p class="results-meta" id="results-meta"></p>
                     </div>
-                    <button class="btn-outline" id="new-analysis-btn">← New Analysis</button>
+                    <div class="results-header-actions">
+                        <button class="btn-outline" id="export-btn" title="Export as PDF">⬇ Export PDF</button>
+                        <button class="btn-save" id="save-report-btn" title="Save this report to My Reports">💾 Save Report</button>
+                        <button class="btn-outline" id="new-analysis-btn">← New Analysis</button>
+                    </div>
+                </div>
+
+                <!-- Overall match score callout -->
+                <div class="match-score-callout hidden" id="match-score-callout">
+                    <div class="match-score-ring">
+                        <svg viewBox="0 0 64 64" width="64" height="64">
+                            <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+                            <circle cx="32" cy="32" r="26" fill="none" stroke-width="6"
+                                    stroke-linecap="round" transform="rotate(-90 32 32)"
+                                    id="match-ring-fill"/>
+                        </svg>
+                        <span id="match-ring-label" class="match-ring-label">--%</span>
+                    </div>
+                    <div class="match-score-text">
+                        <span id="match-score-label" class="match-label">Analyzing…</span>
+                        <p class="match-score-sub">Overall resume-to-job similarity (SBERT)</p>
+                    </div>
                 </div>
 
                 <!-- SBERT Semantic Mismatches Panel (populated by JS) -->
                 <div class="sbert-panel hidden" id="sbert-panel"></div>
+
+                <!-- Comparison Radar Chart Container (populated by JS) -->
+                <div id="comparison-chart-container" class="hidden"></div>
 
                 <h3 class="skills-grid-title" id="skills-grid-title">📚 Skills to Work On (with Learning Resources)</h3>
                 <div class="skills-grid" id="skills-grid">
@@ -194,8 +221,12 @@
             <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
         </div>
     </footer>
-
+    <!-- External libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/analyze.js"></script>
+    <script src="js/chat-widget.js"></script>
 </body>
 
 </html>
+
+
