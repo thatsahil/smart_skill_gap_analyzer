@@ -152,5 +152,9 @@ Return only the raw JSON array."""
         _roadmap_cache[cache_key] = roadmap_steps
         return jsonify({"success": True, "steps": roadmap_steps, "model": MODEL_NAME}), 200
 
+    except http_requests.exceptions.HTTPError as e:
+        return jsonify({"error": f"Gemini API is temporarily unavailable or returned an error: {e}"}), 502
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Could not parse Gemini response: {e}"}), 500
     except Exception as e:
-        return jsonify({"error": f"Error: {e}"}), 500
+        return jsonify({"error": f"Roadmap generation failed: {e}"}), 500

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <title>Admin Panel — Skill Gap Analyzer</title>
+    <meta name="description" content="Master admin panel for managing all users, jobs, and applications on Skill Gap Analyzer.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --admin-accent: #7c6af7;
+            --admin-accent-dim: rgba(124,106,247,0.15);
+            --admin-danger: #ef4444;
+            --admin-success: #10b981;
+            --admin-warn: #f59e0b;
+        }
+
+        body { background: var(--bg-base, #09090b); }
+
+        /* ── Admin Shell ── */
+        .admin-shell {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .admin-sidebar {
+            background: rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 28px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar-logo {
+            padding: 0 24px 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            margin-bottom: 20px;
+        }
+
+        .admin-sidebar-logo h1 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #7c6af7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .admin-sidebar-logo p {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.35);
+            margin-top: 3px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            color: rgba(255,255,255,0.5);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+            width: 100%;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.85);
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--admin-accent-dim);
+            color: #a78bfa;
+        }
+
+        .sidebar-nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+        .sidebar-bottom {
+            padding: 16px 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            margin-top: auto;
+        }
+
+        /* ── Main Content ── */
+        .admin-main {
+            padding: 36px 40px;
+            overflow: hidden;
+        }
+
+        .admin-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+
+        .admin-topbar h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.025em;
+        }
+
+        .admin-topbar p { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-top: 3px; }
+
+        /* ── Stat Cards ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 20px 22px;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover { border-color: rgba(124,106,247,0.3); }
+
+        .stat-card .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #7c6af7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.04em;
+        }
+
+        /* ── Panels ── */
+        .admin-panel { display: none; }
+        .admin-panel.active { display: block; }
+
+        /* ── Table ── */
+        .admin-table-wrap {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .admin-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .admin-table-header h3 { font-size: 0.95rem; font-weight: 700; color: #f1f5f9; }
+
+        .admin-search {
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            width: 220px;
+            transition: border-color 0.2s;
+        }
+
+        .admin-search:focus { border-color: rgba(124,106,247,0.5); }
+
+        table.admin-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        table.admin-tbl thead tr {
+            background: rgba(255,255,255,0.04);
+        }
+
+        table.admin-tbl th {
+            padding: 11px 16px;
+            text-align: left;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        table.admin-tbl td {
+            padding: 13px 16px;
+            color: rgba(255,255,255,0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            vertical-align: middle;
+        }
+
+        table.admin-tbl tr:last-child td { border-bottom: none; }
+
+        table.admin-tbl tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-candidate { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .badge-company   { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+        .badge-admin     { background: rgba(245,158,11,0.2); color: #fcd34d; }
+
+        .btn-tbl-delete {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(239,68,68,0.35);
+            background: rgba(239,68,68,0.1);
+            color: #fca5a5;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-tbl-delete:hover { background: rgba(239,68,68,0.22); }
+
+        .btn-tbl-view {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(124,106,247,0.35);
+            background: rgba(124,106,247,0.12);
+            color: #a78bfa;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.15s;
+        }
+        .btn-tbl-view:hover { background: rgba(124,106,247,0.22); }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: rgba(255,255,255,0.35);
+            font-size: 0.9rem;
+        }
+
+        /* ── Confirm Modal ── */
+        #admin-confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #admin-confirm-overlay.show { display: flex; }
+
+        #admin-confirm-box {
+            background: #0f1320;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 36px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        #admin-confirm-box p { color: #f1f5f9; font-size: 1rem; margin-bottom: 24px; line-height: 1.6; }
+
+        #admin-confirm-box .btn-row { display: flex; gap: 12px; justify-content: center; }
+
+        /* ── Toast ── */
+        #admin-toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .admin-shell { grid-template-columns: 1fr; }
+            .admin-sidebar { display: none; }
+            .admin-main { padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-shell">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-logo">
+            <h1>⚙ Admin Panel</h1>
+            <p id="admin-username-label">Loading…</p>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="sidebar-nav-item active" id="nav-overview" data-panel="panel-overview">
+                <span class="icon">📊</span> Overview
+            </button>
+            <button class="sidebar-nav-item" id="nav-users" data-panel="panel-users">
+                <span class="icon">👥</span> Users
+            </button>
+            <button class="sidebar-nav-item" id="nav-jobs" data-panel="panel-jobs">
+                <span class="icon">💼</span> Jobs
+            </button>
+            <button class="sidebar-nav-item" id="nav-apps" data-panel="panel-apps">
+                <span class="icon">📄</span> Applications
+            </button>
+        </nav>
+        <div class="sidebar-bottom">
+            <button class="sidebar-nav-item" id="admin-logout-btn" style="color:#fca5a5;">
+                <span class="icon">🚪</span> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <div>
+                <h2 id="panel-title">Overview</h2>
+                <p id="panel-subtitle">Platform-wide statistics</p>
+            </div>
+            <button id="mobile-menu-btn" class="sidebar-nav-item" style="display:none;width:auto;">☰ Menu</button>
+        </div>
+
+        <!-- ── Overview Panel ── -->
+        <div class="admin-panel active" id="panel-overview">
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">—</div></div>
+                <div class="stat-card"><div class="stat-label">Candidates</div><div class="stat-value" id="stat-candidates">—</div></div>
+                <div class="stat-card"><div class="stat-label">Companies</div><div class="stat-value" id="stat-companies">—</div></div>
+                <div class="stat-card"><div class="stat-label">Jobs Posted</div><div class="stat-value" id="stat-jobs">—</div></div>
+                <div class="stat-card"><div class="stat-label">Applications</div><div class="stat-value" id="stat-apps">—</div></div>
+                <div class="stat-card"><div class="stat-label">Reports</div><div class="stat-value" id="stat-reports">—</div></div>
+            </div>
+            <p style="color:rgba(255,255,255,0.3);font-size:0.82rem;text-align:center;margin-top:16px;">
+                Use the sidebar to navigate and manage platform data.
+            </p>
+        </div>
+
+        <!-- ── Users Panel ── -->
+        <div class="admin-panel" id="panel-users">
+            <div class="admin-table-wrap">
+                <div class="admin-table-header">
+                    <h3>All Users</h3>
+                    <input class="admin-search" id="user-search" type="text" placeholder="Search name / email…">
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-tbl">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Resume</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <tr><td colspan="5" class="empty-state">Loading users…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Jobs Panel ── -->
+        <div class="admin-panel" id="panel-jobs">
+            <div class="admin-table-wrap">
+                <div class="admin-table-header">
+                    <h3>All Job Postings</h3>
+                    <input class="admin-search" id="job-search-admin" type="text" placeholder="Search title / company…">
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-tbl">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Company</th>
+                                <th>Posted</th>
+                                <th>Applicants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-tbody">
+                            <tr><td colspan="5" class="empty-state">Loading jobs…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Applications Panel ── -->
+        <div class="admin-panel" id="panel-apps">
+            <div class="admin-table-wrap">
+                <div class="admin-table-header">
+                    <h3>All Applications</h3>
+                    <input class="admin-search" id="app-search" type="text" placeholder="Search candidate…">
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-tbl">
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>Email</th>
+                                <th>Job ID</th>
+                                <th>Applied At</th>
+                                <th>Resume</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apps-tbody">
+                            <tr><td colspan="6" class="empty-state">Loading applications…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Confirm Modal -->
+<div id="admin-confirm-overlay">
+    <div id="admin-confirm-box">
+        <p id="admin-confirm-msg">Are you sure?</p>
+        <div class="btn-row">
+            <button id="admin-confirm-cancel" style="padding:10px 22px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#94a3b8;font-family:'Inter',sans-serif;cursor:pointer;font-size:0.9rem;">Cancel</button>
+            <button id="admin-confirm-ok" style="padding:10px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-family:'Inter',sans-serif;cursor:pointer;font-size:0.9rem;font-weight:600;">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="admin-toast-container"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

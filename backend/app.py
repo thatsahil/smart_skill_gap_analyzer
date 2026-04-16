@@ -15,6 +15,7 @@ from models.jobs import jobs_bp
 from models.analyze import analyze_bp
 from models.resume import resume_bp
 from models.reports import reports_bp
+from models.admin import admin_bp
 
 app.register_blueprint(chatbot_bp)
 app.register_blueprint(auth_bp)
@@ -22,6 +23,7 @@ app.register_blueprint(jobs_bp)
 app.register_blueprint(analyze_bp)
 app.register_blueprint(resume_bp)
 app.register_blueprint(reports_bp)
+app.register_blueprint(admin_bp)
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 

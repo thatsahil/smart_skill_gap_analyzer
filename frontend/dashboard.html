@@ -15,13 +15,13 @@
 </head>
 <body>
     <header>
-                        <nav>
+        <nav>
             <div class="logo">Skill Gap Analyzer</div>
-            <div class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="analyze.html">Analyze</a>
-                <a href="skill-gap-reports.html">Roadmap</a>
-                <a href="profile.html">Profile</a>
+            <div class="nav-links" id="main-nav-links">
+                <a href="dashboard.html" id="nav-dashboard">Dashboard</a>
+                <a href="analyze.html" id="nav-analyze">Analyze</a>
+                <a href="skill-gap-reports.html" id="nav-roadmap">Roadmap</a>
+                <a href="profile.html" id="nav-profile">Profile</a>
                 <a href="#" id="logout-btn">Logout</a>
             </div>
         </nav>
@@ -124,6 +124,35 @@
                 </div>
             </div>
 
+            <!-- ── Admin Dashboard ── -->
+            <div id="admin-dashboard" style="display:none;">
+                <div class="dashboard-features-section">
+                    <h2>⚙️ Admin Control Panel</h2>
+                    <p style="color:var(--text-2);margin-bottom:24px;font-size:0.9rem;">You have full access to manage all users, jobs, applications, and platform data.</p>
+                    <div class="dashboard-features">
+                        <div class="feature-item" id="admin-users-card" style="cursor:pointer;">
+                            <h3>👥 Manage Users</h3>
+                            <p>View, edit, or delete candidate and company accounts.</p>
+                        </div>
+                        <div class="feature-item" id="admin-jobs-card" style="cursor:pointer;">
+                            <h3>💼 Manage Jobs</h3>
+                            <p>Oversee all job postings across all companies.</p>
+                        </div>
+                        <div class="feature-item" id="admin-apps-card" style="cursor:pointer;">
+                            <h3>📄 Applications</h3>
+                            <p>View all candidate applications on the platform.</p>
+                        </div>
+                        <div class="feature-item" id="admin-stats-card" style="cursor:pointer;">
+                            <h3>📊 Platform Stats</h3>
+                            <p>Overall analytics for the entire platform.</p>
+                        </div>
+                    </div>
+                    <div class="cta-buttons" style="margin-top:28px;">
+                        <a href="admin.html" class="btn" style="width:auto;min-width:180px;">Open Admin Panel</a>
+                    </div>
+                </div>
+            </div>
+
             <!-- ── Job Listings (both roles) ── -->
             <div class="jobs-section" id="job-listings-card">
                 <div class="jobs-section-header">
@@ -153,8 +182,40 @@
     </footer>
 
     <script src="js/dashboard.js"></script>
-
     <script src="js/chat-widget.js"></script>
+
+    <!-- Applicants Modal -->
+    <div id="applicants-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:10000;overflow-y:auto;padding:40px 16px;">
+        <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:720px;margin:0 auto;padding:36px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2 id="applicants-modal-title" style="font-size:1.1rem;font-weight:700;color:#f1f5f9;">Applicants</h2>
+                <button id="close-applicants-modal" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <div id="applicants-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+        </div>
+    </div>
+
+    <!-- Edit Job Modal -->
+    <div id="edit-job-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:10000;padding:40px 16px;display:none;align-items:center;justify-content:center;">
+        <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:540px;width:100%;padding:36px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2 style="font-size:1.1rem;font-weight:700;color:#f1f5f9;">Edit Job Posting</h2>
+                <button id="close-edit-modal" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <form id="edit-job-form">
+                <input type="hidden" id="edit-job-id">
+                <div class="form-group">
+                    <label for="edit-job-title">Job Title</label>
+                    <input type="text" id="edit-job-title" required placeholder="e.g. Senior ML Engineer">
+                </div>
+                <div class="form-group">
+                    <label for="edit-job-desc">Job Description</label>
+                    <textarea id="edit-job-desc" rows="6" required placeholder="Describe the role…"></textarea>
+                </div>
+                <button type="submit" class="btn" style="margin-top:4px;">Save Changes</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
 

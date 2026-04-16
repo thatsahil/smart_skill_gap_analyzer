@@ -49,12 +49,14 @@ def login():
 
     user = users_collection.find_one({"email": email})
     if user and check_password_hash(user['password'], password):
+        user_type = user.get('user_type', 'candidate')
+        redirect_page = 'admin.html' if user_type == 'admin' else 'dashboard.html'
         return jsonify({
             "message": "Login successful!",
-            "redirect": "dashboard.html",
+            "redirect": redirect_page,
             "user_id": str(user['_id']),
             "username": user['name'],
-            "user_type": user.get('user_type', 'candidate')
+            "user_type": user_type
         }), 200
     return jsonify({"message": "Invalid email or password"}), 401
 
