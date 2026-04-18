@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Analyze — Skill Gap Analyzer</title>
+    <meta name="description"
+        content="Upload your resume and a job description for an AI-powered semantic skill gap analysis.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/analyze.css">
+</head>
+
+<body>
+    <header>
+                        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ── Hero ───────────────────────────────────────────────────────── -->
+        <section class="analyze-hero">
+            <div class="container">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    AI-Powered · SBERT Semantic Analysis
+                </div>
+                <h1>Analyze Your Skill Gap</h1>
+                <p>Upload your resume and a job description. Our AI compares them semantically —> not just keywords —>
+                    and
+                    tells you exactly what to learn.</p>
+            </div>
+        </section>
+
+        <!-- ── Upload Panel ───────────────────────────────────────────────── -->
+        <section class="analyze-section">
+            <div class="container analyze-grid">
+
+                <!-- Left: Resume upload -->
+                <div class="upload-card" id="resume-card">
+                    <div class="card-header">
+                        <div class="card-icon">📄</div>
+                        <div>
+                            <h2>Your Resume</h2>
+                            <p class="card-sub">PDF format only</p>
+                        </div>
+                    </div>
+
+                    <div class="drop-zone" id="resume-drop">
+                        <input type="file" id="resume-input" accept=".pdf" hidden>
+                        <div class="drop-content" id="resume-drop-content">
+                            <div class="drop-icon">☁️</div>
+                            <p>Drag & drop your PDF here</p>
+                            <span>or</span>
+                            <button class="btn-outline" onclick="document.getElementById('resume-input').click()">Browse
+                                Files</button>
+                        </div>
+                        <div class="file-selected hidden" id="resume-file-info">
+                            <div class="file-icon">📋</div>
+                            <div>
+                                <p class="file-name" id="resume-file-name"></p>
+                                <span class="file-size" id="resume-file-size"></span>
+                            </div>
+                            <button class="remove-btn" id="resume-remove">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Job Description -->
+                <div class="upload-card" id="jd-card">
+                    <div class="card-header">
+                        <div class="card-icon">💼</div>
+                        <div>
+                            <h2>Job Description</h2>
+                            <p class="card-sub">Text, PDF, or select a posting</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab switcher -->
+                    <div class="jd-tabs">
+                        <button class="jd-tab active" data-tab="text" id="tab-text">✏️ Paste Text</button>
+                        <button class="jd-tab" data-tab="pdf" id="tab-pdf">📄 Upload PDF</button>
+                        <button class="jd-tab" data-tab="job" id="tab-job">💼 Select Job</button>
+                    </div>
+
+                    <!-- Tab: Text -->
+                    <div class="jd-panel active" id="panel-text">
+                        <textarea id="jd-textarea" placeholder="Paste the full job description here…"
+                            rows="10"></textarea>
+                        <div class="char-count"><span id="jd-char-count">0</span> characters</div>
+                    </div>
+
+                    <!-- Tab: PDF -->
+                    <div class="jd-panel" id="panel-pdf">
+                        <div class="drop-zone small" id="jd-drop">
+                            <input type="file" id="jd-input" accept=".pdf" hidden>
+                            <div class="drop-content" id="jd-drop-content">
+                                <div class="drop-icon">☁️</div>
+                                <p>Drag & drop JD PDF here</p>
+                                <button class="btn-outline"
+                                    onclick="document.getElementById('jd-input').click()">Browse</button>
+                            </div>
+                            <div class="file-selected hidden" id="jd-file-info">
+                                <div class="file-icon">📋</div>
+                                <div>
+                                    <p class="file-name" id="jd-file-name"></p>
+                                    <span class="file-size" id="jd-file-size"></span>
+                                </div>
+                                <button class="remove-btn" id="jd-remove">✕</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Select Job Posting -->
+                    <div class="jd-panel" id="panel-job">
+                        <div class="job-select-info">Loading available job postings…</div>
+                        <div id="job-list-container" class="job-list hidden"></div>
+                        <input type="hidden" id="selected-job-id">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyze button -->
+            <div class="container analyze-footer">
+                <button class="btn-analyze" id="analyze-btn">
+                    <span class="btn-icon">🔍</span>
+                    Analyze Skill Gap
+                </button>
+                <p class="analyze-hint">Analysis takes 10–30 seconds. SBERT model loads on first use.</p>
+            </div>
+        </section>
+
+        <!-- ── Loading overlay ────────────────────────────────────────────── -->
+        <div class="loading-overlay hidden" id="loading-overlay">
+            <div class="loading-card">
+                <div class="loader-ring"></div>
+                <h3>Analyzing your profile…</h3>
+                <p id="loading-status">Extracting text from PDF…</p>
+                <div class="loading-steps">
+                    <div class="step active" id="step-1">📄 Extracting text</div>
+                    <div class="step" id="step-2">🧠 Running SBERT analysis</div>
+                    <div class="step" id="step-3">✨ Generating recommendations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Results Panel ──────────────────────────────────────────────── -->
+        <section class="results-section hidden" id="results-section">
+            <div class="container">
+                <div class="results-header">
+                    <div>
+                        <h2>Your Skill Gap Report</h2>
+                        <p class="results-meta" id="results-meta"></p>
+                    </div>
+                    <div class="results-header-actions">
+                        <button class="btn-outline" id="export-btn" title="Export as PDF">⬇ Export PDF</button>
+                        <button class="btn-save" id="save-report-btn" title="Save this report to My Reports">💾 Save Report</button>
+                        <button class="btn-outline" id="new-analysis-btn">← New Analysis</button>
+                    </div>
+                </div>
+
+                <!-- Overall match score callout -->
+                <div class="match-score-callout hidden" id="match-score-callout">
+                    <div class="match-score-ring">
+                        <svg viewBox="0 0 64 64" width="64" height="64">
+                            <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+                            <circle cx="32" cy="32" r="26" fill="none" stroke-width="6"
+                                    stroke-linecap="round" transform="rotate(-90 32 32)"
+                                    id="match-ring-fill"/>
+                        </svg>
+                        <span id="match-ring-label" class="match-ring-label">--%</span>
+                    </div>
+                    <div class="match-score-text">
+                        <span id="match-score-label" class="match-label">Analyzing…</span>
+                        <p class="match-score-sub">Overall resume-to-job similarity (SBERT)</p>
+                    </div>
+                </div>
+
+                <!-- SBERT Semantic Mismatches Panel (populated by JS) -->
+                <div class="sbert-panel hidden" id="sbert-panel"></div>
+
+                <!-- Comparison Radar Chart Container (populated by JS) -->
+                <div id="comparison-chart-container" class="hidden"></div>
+
+                <h3 class="skills-grid-title" id="skills-grid-title">📚 Skills to Work On (with Learning Resources)</h3>
+                <div class="skills-grid" id="skills-grid">
+                    <!-- Skill cards rendered by JS -->
+                </div>
+
+                <div class="results-footer">
+                    <p>💡 Click on any skill above to generate a full learning roadmap on the <a
+                            href="skill-gap-reports.html">roadmap page</a>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Error Toast ────────────────────────────────────────────────── -->
+        <div class="error-toast hidden" id="error-toast">
+            <span class="toast-icon">⚠️</span>
+            <span id="error-msg">Something went wrong.</span>
+            <button onclick="document.getElementById('error-toast').classList.add('hidden')">✕</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+        </div>
+    </footer>
+    <!-- External libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/analyze.js"></script>
+    <script src="js/chat-widget.js"></script>
+</body>
+
+</html>
+
+

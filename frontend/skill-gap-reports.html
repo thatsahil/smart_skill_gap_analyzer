@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Learning Roadmap — Skill Gap Analyzer</title>
+    <meta name="description" content="Generate an AI-powered, interactive learning roadmap for any skill you want to master.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/skill-gap-reports.css">
+</head>
+<body>
+    <header>
+                        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="roadmap-main">
+        <!-- Hero / Input Section -->
+        <section class="roadmap-hero">
+            <div class="hero-bg-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="container">
+                <div class="hero-text">
+                    <span class="hero-badge">✦ AI-Powered</span>
+                    <h1>Your Learning <span class="gradient-text">Roadmap</span></h1>
+                    <p>Enter any skill you want to master and get a personalized, step-by-step AI-generated learning path.</p>
+                </div>
+
+                <div class="input-card glass-card">
+                    <form id="skill-form">
+                        <div class="input-row">
+                            <div class="form-field">
+                                <label for="skill-input">
+                                    <span class="label-icon">🎯</span> What skill do you want to learn?
+                                </label>
+                                <input
+                                    type="text"
+                                    id="skill-input"
+                                    placeholder="e.g. Machine Learning, Docker, UI/UX Design…"
+                                    autocomplete="off"
+                                    required
+                                />
+                            </div>
+                            <div class="form-field form-field--small">
+                                <label for="level-select">
+                                    <span class="label-icon">📊</span> Your Current Level
+                                </label>
+                                <div class="custom-select-wrapper">
+                                    <select id="level-select" required>
+                                        <option value="">Select level</option>
+                                        <option value="beginner">🌱 Beginner</option>
+                                        <option value="intermediate">⚡ Intermediate</option>
+                                        <option value="advanced">🔥 Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="generate-btn" id="generate-btn">
+                            <span class="btn-text">Generate My Roadmap</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-card">
+                <div class="ai-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring spinner-ring--2"></div>
+                    <div class="spinner-ring spinner-ring--3"></div>
+                    <span class="spinner-icon">✨</span>
+                </div>
+                <h3>Crafting your roadmap…</h3>
+                <p id="loading-tip">Gemini AI is designing your personalized learning path</p>
+            </div>
+        </div>
+
+        <!-- Roadmap Section -->
+        <section id="roadmap-section" class="roadmap-section hidden">
+            <div class="container">
+                <!-- Roadmap Header -->
+                <div class="roadmap-header">
+                    <div class="roadmap-title-group">
+                        <h2 id="roadmap-title">Your Roadmap</h2>
+                        <p id="roadmap-subtitle" class="roadmap-subtitle"></p>
+                    </div>
+                    <div class="roadmap-actions">
+                        <div class="progress-ring-wrap">
+                            <svg class="progress-ring" width="64" height="64" viewBox="0 0 64 64">
+                                <circle class="progress-ring__bg" cx="32" cy="32" r="26" />
+                                <circle class="progress-ring__fill" id="progress-ring-fill" cx="32" cy="32" r="26" />
+                            </svg>
+                            <span class="progress-ring-label" id="progress-ring-label">0%</span>
+                        </div>
+                        <div class="progress-text-group">
+                            <span id="progress-text" class="progress-text">0 of 0 completed</span>
+                            <button class="reset-btn" id="reset-btn">↺ Reset Progress</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-dot legend-dot--todo"></span>Not Started</span>
+                    <span class="legend-item"><span class="legend-dot legend-dot--progress"></span>In Progress</span>
+                    <span class="legend-item"><span class="legend-dot legend-dot--done"></span>Completed</span>
+                </div>
+
+                <!-- Vertical Roadmap Nodes -->
+                <div class="roadmap-nodes" id="roadmap-nodes">
+                    <!-- Nodes injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Toast -->
+        <div id="error-toast" class="error-toast hidden">
+            <span class="toast-icon">⚠️</span>
+            <span id="error-message">Something went wrong.</span>
+            <button class="toast-close" id="toast-close">✕</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/skill-gap-reports.js"></script>
+
+    <script src="js/chat-widget.js"></script>
+</body>
+</html>
+
+

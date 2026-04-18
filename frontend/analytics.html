@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <meta name="description" content="View your personal career analytics, track skill growth, and identify top missing skills across all your applications.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Career Analytics — Skill Gap Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/analytics.css">
+</head>
+<body>
+    <header>
+                        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="analytics-main">
+        <section class="page-hero">
+            <div class="container">
+                <h1 class="page-title">Career Analytics</h1>
+                <p class="page-subtitle">Track your skill growth, identify trends, and discover exactly what's holding you back.</p>
+            </div>
+        </section>
+
+        <section class="analytics-content">
+            <div class="container">
+                <!-- Data Loading Skeleton -->
+                <div id="analytics-loader" class="analytics-loader">
+                    <div class="loader-spinner"></div>
+                    <p>Aggregating your career data...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="analytics-empty" class="glass-card hidden" style="text-align:center; padding: 64px 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;">📊</div>
+                    <h3 style="font-size: 1.2rem; color: var(--text-1); margin-bottom: 8px;">No data available yet</h3>
+                    <p style="color: var(--text-2); margin-bottom: 24px; max-width: 400px; margin-left:auto; margin-right:auto;">Run a few resume analyses against job descriptions and save the reports to see your career trends here.</p>
+                    <a href="analyze.html" class="btn">Start an Analysis</a>
+                </div>
+
+                <!-- Charts Dashboard -->
+                <div id="analytics-dashboard" class="hidden">
+                    <!-- Top stats row -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Reports Saved</span>
+                            <strong class="stat-value" id="stat-total-reports">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Avg Match Score</span>
+                            <strong class="stat-value" id="stat-avg-score">0%</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Unique Skills Missing</span>
+                            <strong class="stat-value" id="stat-unique-gaps">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <!-- Left Column -->
+                        <div class="chart-col">
+                            <div class="glass-card chart-card">
+                                <h3>📊 Skill Gap Trend</h3>
+                                <p class="card-desc">Your match score timeline across recent analyses.</p>
+                                <div class="chart-container">
+                                    <canvas id="trend-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="chart-col">
+                            <div class="glass-card chart-card">
+                                <h3>🎯 Top Missing Skills</h3>
+                                <p class="card-desc">The skills most frequently required that you lack.</p>
+                                <div class="chart-container">
+                                    <canvas id="skills-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer</p>
+        </div>
+    </footer>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/analytics.js"></script>
+
+    <script src="js/chat-widget.js"></script>
+</body>
+</html>
+
+
+

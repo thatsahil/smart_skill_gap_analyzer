@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <meta name="description"
+        content="Bridge the gap between your skills and job market demands with AI-powered semantic analysis and personalized learning roadmaps.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Skill Gap Analyzer — Bridge Your Career Gap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ── Landing-page-specific overrides ── */
+        .landing-hero {
+            padding: 88px 0 72px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .landing-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% -5%, rgba(124, 106, 247, 0.09) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .landing-hero .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border: 1px solid var(--border-md);
+            border-radius: var(--radius-pill);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-2);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            background: var(--bg-raised);
+            margin-bottom: 28px;
+        }
+
+        .landing-hero h1 {
+            font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.1;
+            background: linear-gradient(160deg, var(--text-1) 40%, var(--text-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .landing-hero p {
+            font-size: 1rem;
+            color: var(--text-2);
+            max-width: 480px;
+            margin: 0 auto 36px;
+            line-height: 1.75;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero-cta .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .hero-cta .btn-primary:hover {
+            background: #6d5ce6;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 28px rgba(124, 106, 247, 0.35);
+        }
+
+        .hero-cta .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            background: transparent;
+            color: var(--text-2);
+            border: 1px solid var(--border-md);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .hero-cta .btn-ghost:hover {
+            border-color: var(--border-lg);
+            color: var(--text-1);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* ── Feature Section ── */
+        .features-section {
+            padding: 80px 0 72px;
+        }
+
+        .features-section-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: var(--accent);
+            border-radius: 0 2px 2px 0;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-md);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-num {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-3);
+            letter-spacing: 0.04em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-1);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-card p {
+            font-size: 0.83rem;
+            color: var(--text-2);
+            line-height: 1.65;
+        }
+
+        /* ── CTA Bottom ── */
+        .cta-bottom {
+            padding: 64px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .cta-bottom h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-1);
+            letter-spacing: -0.025em;
+            margin-bottom: 10px;
+        }
+
+        .cta-bottom p {
+            font-size: 0.9rem;
+            color: var(--text-2);
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .landing-hero {
+                padding: 60px 0 48px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#about">About</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html" class="btn">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="landing-hero">
+            <div class="container">
+                <div class="eyebrow">
+                    <span
+                        style="width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+                    AI-Powered · SBERT Semantic Matching
+                </div>
+                <h1>Know exactly what skills you're missing</h1>
+                <p>Upload your resume, paste a job description, and get a precise semantic gap analysis — not keyword
+                    guessing.</p>
+                <div class="hero-cta">
+                    <a href="signup.html" class="btn-primary">Get started free →</a>
+                    <a href="login.html" class="btn-ghost">Sign in</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features-section">
+            <div class="container">
+                <p class="features-section-label">What you get</p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-num">01</span>
+                        <h3>Semantic Resume Matching</h3>
+                        <p>SBERT embeddings compare your resume to the job description at a meaning level — not just
+                            keyword frequency. You get a real similarity score.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-num">02</span>
+                        <h3>AI Skill Gap Report</h3>
+                        <p>Gemini identifies the exact skills you're missing and explains why each one matters for the
+                            role — with curated learning resources included.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-num">03</span>
+                        <h3>Personalized Roadmaps</h3>
+                        <p>Turn any identified skill gap into a step-by-step learning roadmap. Save, track, and build
+                            over time from your profile.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Bottom -->
+        <section class="cta-bottom">
+            <div class="container">
+                <h2>Ready to close your skill gaps?</h2>
+                <p>Join candidates and companies already using the platform.</p>
+                <div class="hero-cta">
+                    <a href="signup.html" class="btn-primary">Create a free account</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+
+
+</body>
+
+</html>

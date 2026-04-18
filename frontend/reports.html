@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <title>Skill Gap Analyzer - My Reports</title>
+    <meta name="description" content="View all your saved skill gap analysis reports.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/reports.css">
+</head>
+<body>
+    <header>
+                        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="reports-hero">
+            <div class="container">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    Saved Analyses
+                </div>
+                <h1>My Skill Gap Reports</h1>
+                <p>All your previously saved analyses in one place. Click any skill to build a learning roadmap.</p>
+                <a href="analyze.html" class="btn" style="width:auto;padding:12px 28px;margin-top:16px;">+ New Analysis</a>
+            </div>
+        </section>
+
+        <!-- Reports list -->
+        <section class="reports-section">
+            <div class="container">
+                <!-- Loading state -->
+                <div id="reports-loading" class="reports-loading">
+                    <div class="spinner-ring-sm"></div>
+                    <p>Loading your reports…</p>
+                </div>
+
+                <!-- Empty state -->
+                <div id="reports-empty" class="reports-empty hidden">
+                    <div class="empty-icon">📊</div>
+                    <h3>No reports saved yet</h3>
+                    <p>Run an analysis and click <strong>"Save Report"</strong> to keep track of your skill gaps over time.</p>
+                    <a href="analyze.html" class="btn" style="width:auto;padding:12px 28px;margin-top:20px;">Start Your First Analysis</a>
+                </div>
+
+                <!-- Reports grid -->
+                <div id="reports-grid" class="reports-grid hidden"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/reports.js"></script>
+
+    <script src="js/chat-widget.js"></script>
+</body>
+</html>
+
+
+
