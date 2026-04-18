@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (manageResumesCard) {
         manageResumesCard.style.cursor = 'pointer';
         manageResumesCard.addEventListener('click', () => {
-            window.location.href = 'profile.html';
+            window.location.href = 'manageResume.html';
         });
     }
 

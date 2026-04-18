@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
+    <title>Manage Resume — Skill Gap Analyzer</title>
+    <meta name="description" content="Upload your resume PDF to get an ATS compatibility score, extracted skills, your location, and a professional summary.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/manageResume.css">
+</head>
+<body>
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
+    <header>
+        <nav>
+            <div class="logo">Skill Gap Analyzer</div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="analyze.html">Analyze</a>
+                <a href="skill-gap-reports.html">Roadmap</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- ── Hero ────────────────────────────────────────────────────── -->
+        <section class="mr-hero">
+            <div class="container">
+                <div class="mr-hero-badge">
+                    <span class="mr-badge-dot"></span>
+                    AI-Powered · ATS Score · Skill Extraction
+                </div>
+                <h1>Manage Your Resume</h1>
+                <p>Upload your resume PDF to get an ATS compatibility score, extract every skill automatically, see your location and a professional summary — all in one place.</p>
+            </div>
+        </section>
+
+        <!-- ── Pipeline steps indicator ────────────────────────────────── -->
+        <section class="mr-pipeline-section">
+            <div class="container">
+                <div class="mr-pipeline">
+                    <div class="mr-pipe-step" id="pipe-upload">
+                        <div class="mr-pipe-icon">📄</div>
+                        <span>Upload</span>
+                    </div>
+                    <div class="mr-pipe-arrow">→</div>
+                    <div class="mr-pipe-step" id="pipe-ats">
+                        <div class="mr-pipe-icon">🎯</div>
+                        <span>ATS Score</span>
+                    </div>
+                    <div class="mr-pipe-arrow">→</div>
+                    <div class="mr-pipe-step" id="pipe-skills">
+                        <div class="mr-pipe-icon">🧠</div>
+                        <span>Skills</span>
+                    </div>
+                    <div class="mr-pipe-arrow">→</div>
+                    <div class="mr-pipe-step" id="pipe-summary">
+                        <div class="mr-pipe-icon">📝</div>
+                        <span>Summary</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Upload Card ──────────────────────────────────────────────── -->
+        <section class="mr-section">
+            <div class="container">
+                <div class="mr-upload-grid">
+
+                    <!-- Drop zone -->
+                    <div class="mr-upload-card" id="mr-upload-card">
+                        <div class="mr-card-header">
+                            <div class="mr-card-icon">📄</div>
+                            <div>
+                                <h2>Your Resume</h2>
+                                <p class="mr-card-sub">PDF format only · up to 10 MB</p>
+                            </div>
+                        </div>
+
+                        <!-- Stored resume banner -->
+                        <div class="mr-stored-banner hidden" id="mr-stored-banner">
+                            <span class="mr-stored-icon">📋</span>
+                            <div class="mr-stored-info">
+                                <p id="mr-stored-name">resume.pdf</p>
+                                <span id="mr-stored-meta">Stored on server</span>
+                            </div>
+                            <div class="mr-stored-actions">
+                                <a href="#" class="mr-btn-link" id="mr-download-btn">⬇ Download</a>
+                                <button class="mr-btn-link mr-btn-danger" id="mr-delete-stored-btn">🗑 Remove</button>
+                            </div>
+                        </div>
+
+                        <!-- Drop zone -->
+                        <div class="mr-drop-zone" id="mr-drop-zone">
+                            <input type="file" id="mr-file-input" hidden>
+                            <div class="mr-drop-content" id="mr-drop-content">
+                                <div class="mr-drop-icon">☁️</div>
+                                <p>Drag &amp; drop your PDF here</p>
+                                <span class="mr-drop-or">or</span>
+                                <button class="mr-btn-outline" id="mr-browse-btn">Browse Files</button>
+                            </div>
+                            <div class="mr-file-selected hidden" id="mr-file-info">
+                                <div class="mr-file-icon">📋</div>
+                                <div>
+                                    <p class="mr-file-name" id="mr-file-name"></p>
+                                    <span class="mr-file-size" id="mr-file-size"></span>
+                                </div>
+                                <button class="mr-remove-btn" id="mr-remove-btn">✕</button>
+                            </div>
+                        </div>
+
+                        <!-- Analyse button -->
+                        <button class="mr-analyse-btn" id="mr-analyse-btn" disabled>
+                            <span id="mr-analyse-icon">🔍</span>
+                            <span id="mr-analyse-text">Analyse Resume</span>
+                        </button>
+                        <p class="mr-analyse-hint">Analysis uses AI — takes 10–20 seconds.</p>
+                    </div>
+
+                    <!-- What happens panel -->
+                    <div class="mr-info-card">
+                        <h3>What we analyse</h3>
+                        <ul class="mr-info-list">
+                            <li>
+                                <span class="mr-info-icon">🎯</span>
+                                <div>
+                                    <strong>ATS Score</strong>
+                                    <p>Keyword density, formatting signals, and section completeness give you an ATS compatibility score.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="mr-info-icon">🧩</span>
+                                <div>
+                                    <strong>Skill Extraction</strong>
+                                    <p>Our regex + NLP pipeline pulls every technical skill from your PDF text.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="mr-info-icon">📍</span>
+                                <div>
+                                    <strong>Location</strong>
+                                    <p>We extract your city/country from the resume so everything is in one view.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="mr-info-icon">📝</span>
+                                <div>
+                                    <strong>Professional Summary</strong>
+                                    <p>Gemini AI reads your resume and writes a concise professional summary for you.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Loading overlay ──────────────────────────────────────────── -->
+        <div class="mr-loading-overlay hidden" id="mr-loading-overlay">
+            <div class="mr-loading-card">
+                <div class="mr-loader-ring"></div>
+                <h3>Analysing your resume…</h3>
+                <p id="mr-loading-status">Preparing…</p>
+                <div class="mr-loading-steps">
+                    <div class="mr-step" id="mr-step-1">📄 Extracting text from PDF</div>
+                    <div class="mr-step" id="mr-step-2">🎯 Computing ATS score &amp; skills</div>
+                    <div class="mr-step" id="mr-step-3">📝 Generating summary with AI</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Results ──────────────────────────────────────────────────── -->
+        <section class="mr-results-section hidden" id="mr-results-section">
+            <div class="container">
+
+                <!-- ATS Score Row -->
+                <div class="mr-ats-row" id="mr-ats-row">
+                    <div class="mr-ats-card">
+                        <div class="mr-ats-ring-wrap">
+                            <svg class="mr-ats-svg" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="10"/>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke-width="10"
+                                        stroke-linecap="round" transform="rotate(-90 60 60)"
+                                        id="mr-ats-ring-fill" stroke-dasharray="0 314"/>
+                            </svg>
+                            <span class="mr-ats-ring-label" id="mr-ats-score-label">--%</span>
+                        </div>
+                        <div class="mr-ats-text">
+                            <h3 id="mr-ats-verdict">ATS Score</h3>
+                            <p id="mr-ats-desc">Analysing…</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick stats -->
+                    <div class="mr-quick-stats" id="mr-quick-stats">
+                        <div class="mr-stat-item">
+                            <span class="mr-stat-val" id="mr-stat-skills">–</span>
+                            <span class="mr-stat-label">Skills Found</span>
+                        </div>
+                        <div class="mr-stat-item">
+                            <span class="mr-stat-val" id="mr-stat-location">–</span>
+                            <span class="mr-stat-label">Location</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="mr-summary-card hidden" id="mr-summary-card">
+                    <div class="mr-summary-header">
+                        <span>📝</span>
+                        <h3>Professional Summary</h3>
+                    </div>
+                    <p id="mr-summary-text"></p>
+                </div>
+
+                <!-- Extracted Skills Panel -->
+                <div class="mr-skills-panel">
+                    <div class="mr-skills-panel-header">
+                        <span class="mr-skills-icon">🧩</span>
+                        <h3>Extracted Skills</h3>
+                        <span class="mr-skills-count" id="mr-skills-count-badge"></span>
+                    </div>
+                    <p class="mr-panel-desc">Skills detected in your resume via our keyword extraction engine.</p>
+                    <div class="mr-skills-wrap" id="mr-skills-wrap">
+                        <!-- skill tags injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Re-analyse button -->
+                <div class="mr-reanalyse-row">
+                    <button class="mr-btn-outline" id="mr-new-btn">← Analyse Another Resume</button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/manageResume.js"></script>
+    <script src="js/chat-widget.js"></script>
+</body>
+</html>
