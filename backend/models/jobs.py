@@ -96,4 +96,42 @@ def get_applications():
     apps = list(applications_collection.find(query).sort('applied_at', -1))
     for a in apps:
         a['_id'] = str(a['_id'])
+        # Enrich with candidate email
+        try:
+            from bson import ObjectId as ObjId
+            candidate = users_collection.find_one({'_id': ObjId(a['user_id'])})
+            if candidate:
+                a['candidate_email'] = candidate.get('email', '')
+                a['candidate_skills'] = candidate.get('skills', '')
+        except Exception:
+            pass
+        a['has_resume'] = (UPLOAD_DIR / f"{a['user_id']}.pdf").exists()
     return jsonify(apps), 200
+
+
+@jobs_bp.route('/api/edit-job/<job_id>', methods=['PUT'])
+def edit_job(job_id):
+    data = request.json
+    company_id = data.get('company_id')
+    if not company_id:
+        return jsonify({'message': 'company_id is required'}), 400
+
+    try:
+        job = jobs_collection.find_one({'_id': ObjectId(job_id)})
+    except Exception:
+        return jsonify({'message': 'Invalid job ID'}), 400
+
+    if not job:
+        return jsonify({'message': 'Job not found'}), 404
+    if job.get('company_id') != company_id:
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    update_fields = {}
+    if 'title' in data: update_fields['title'] = data['title']
+    if 'description' in data: update_fields['description'] = data['description']
+
+    if not update_fields:
+        return jsonify({'message': 'Nothing to update'}), 400
+
+    jobs_collection.update_one({'_id': ObjectId(job_id)}, {'$set': update_fields})
+    return jsonify({'message': 'Job updated successfully!'}), 200

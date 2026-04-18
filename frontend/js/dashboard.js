@@ -93,6 +93,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setActiveNav();
 
+    // Hide nav links that companies shouldn't see
+    if (userType === 'company') {
+        document.getElementById('nav-analyze')?.remove();
+        document.getElementById('nav-roadmap')?.remove();
+    }
+    // Admin: redirect to admin panel immediately
+    if (userType === 'admin') {
+        window.location.href = 'admin.html';
+        return;
+    }
+
     // Welcome message
     const welcomeEl = document.getElementById('welcome-message');
     if (welcomeEl && storedUsername) {
@@ -102,13 +113,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Toggle dashboard sections by user type
     const candidateSection = document.getElementById('candidate-dashboard');
     const companySection   = document.getElementById('company-dashboard');
+    const adminSection     = document.getElementById('admin-dashboard');
 
     if (userType === 'company') {
         if (companySection)   companySection.style.display = 'block';
         if (candidateSection) candidateSection.style.display = 'none';
+        if (adminSection)     adminSection.style.display = 'none';
+    } else if (userType === 'admin') {
+        if (adminSection)     adminSection.style.display = 'block';
+        if (candidateSection) candidateSection.style.display = 'none';
+        if (companySection)   companySection.style.display = 'none';
     } else {
         if (candidateSection) candidateSection.style.display = 'block';
         if (companySection)   companySection.style.display = 'none';
+        if (adminSection)     adminSection.style.display = 'none';
     }
 
     // ── Candidate feature cards ─────────────────────────────────────────
@@ -182,7 +200,117 @@ document.addEventListener('DOMContentLoaded', function () {
     if (viewAppsBtn) {
         viewAppsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showToast('Applications feature coming soon! Candidates will be able to apply directly to your postings.', 'info');
+            // scroll to jobs list so user can click View Applicants on a specific job
+            document.getElementById('job-listings-card')?.scrollIntoView({ behavior: 'smooth' });
+            showToast('Click "👥 View Applicants" on a job card below to see who applied.', 'info');
+        });
+    }
+
+    // ── Applicants Modal ────────────────────────────────────────────────
+    const applicantsModal = document.getElementById('applicants-modal');
+    const closeApplicantsBtn = document.getElementById('close-applicants-modal');
+    if (closeApplicantsBtn) {
+        closeApplicantsBtn.addEventListener('click', () => {
+            applicantsModal.style.display = 'none';
+        });
+    }
+    applicantsModal?.addEventListener('click', (e) => {
+        if (e.target === applicantsModal) applicantsModal.style.display = 'none';
+    });
+
+    async function openApplicantsModal(jobId, jobTitle) {
+        const modal = document.getElementById('applicants-modal');
+        const title = document.getElementById('applicants-modal-title');
+        const list  = document.getElementById('applicants-list');
+        title.textContent = `Applicants for: ${jobTitle}`;
+        list.innerHTML = '<p style="color:#94a3b8;">Loading…</p>';
+        modal.style.display = 'block';
+
+        try {
+            const r = await fetch(`http://127.0.0.1:5000/api/applications?job_id=${jobId}`);
+            const apps = await r.json();
+            if (!Array.isArray(apps) || apps.length === 0) {
+                list.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:20px;">No applications yet for this job.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            apps.forEach((app, idx) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;';
+                card.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <div>
+                            <p style="color:#f1f5f9;font-weight:600;font-size:0.95rem;margin-bottom:4px;">${escapeHtml(app.candidate_name || 'Unknown')}</p>
+                            <p style="color:#94a3b8;font-size:0.82rem;">${escapeHtml(app.candidate_email || '')}</p>
+                            ${app.candidate_skills ? `<p style="color:#a78bfa;font-size:0.8rem;margin-top:4px;">Skills: ${escapeHtml(app.candidate_skills)}</p>` : ''}
+                            <p style="color:#64748b;font-size:0.78rem;margin-top:6px;">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-shrink:0;">
+                            ${app.has_resume
+                                ? `<a href="http://127.0.0.1:5000/api/resume/download?user_id=${app.user_id}" target="_blank"
+                                    style="padding:8px 14px;border-radius:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);
+                                    color:#a78bfa;font-size:0.82rem;font-weight:600;text-decoration:none;white-space:nowrap;">📄 View Resume</a>`
+                                : `<span style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);color:#64748b;font-size:0.82rem;">No Resume</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        } catch {
+            list.innerHTML = '<p style="color:#fca5a5;">Failed to load applicants. Please try again.</p>';
+        }
+    }
+
+    // ── Edit Job Modal ──────────────────────────────────────────────────
+    const editJobModal = document.getElementById('edit-job-modal');
+    const closeEditBtn = document.getElementById('close-edit-modal');
+    if (closeEditBtn) {
+        closeEditBtn.addEventListener('click', () => {
+            editJobModal.style.display = 'none';
+        });
+    }
+    editJobModal?.addEventListener('click', (e) => {
+        if (e.target === editJobModal) editJobModal.style.display = 'none';
+    });
+
+    function openEditModal(job) {
+        document.getElementById('edit-job-id').value  = job._id;
+        document.getElementById('edit-job-title').value = job.title;
+        document.getElementById('edit-job-desc').value  = job.description;
+        editJobModal.style.display = 'flex';
+    }
+
+    const editJobForm = document.getElementById('edit-job-form');
+    if (editJobForm) {
+        editJobForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const jobId = document.getElementById('edit-job-id').value;
+            const title = document.getElementById('edit-job-title').value.trim();
+            const desc  = document.getElementById('edit-job-desc').value.trim();
+            const submitBtn = editJobForm.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Saving…';
+            submitBtn.disabled = true;
+            try {
+                const r = await fetch(`http://127.0.0.1:5000/api/edit-job/${jobId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_id: userId, title, description: desc }),
+                });
+                const d = await r.json();
+                if (r.ok) {
+                    showToast('Job updated successfully!', 'success');
+                    editJobModal.style.display = 'none';
+                    await loadAllJobs();
+                } else {
+                    showToast(d.message || 'Could not update job.', 'error');
+                }
+            } catch {
+                showToast('Server error.', 'error');
+            } finally {
+                submitBtn.textContent = 'Save Changes';
+                submitBtn.disabled = false;
+            }
         });
     }
 
@@ -245,7 +373,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="score-chip-area"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
                     <button class="btn view-details-btn" data-id="${job._id}" style="width:auto;padding:7px 16px;font-size:0.82rem;">View Details</button>
-                    ${isOwner ? `<button class="delete-btn" data-id="${job._id}">Delete</button>` : ''}
+                    ${isOwner ? `
+                        <button class="btn edit-job-btn" data-id="${job._id}" style="width:auto;padding:7px 16px;font-size:0.82rem;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);color:#a78bfa;">✏️ Edit</button>
+                        <button class="btn view-applicants-btn" data-id="${job._id}" data-title="${escapeHtml(job.title)}" style="width:auto;padding:7px 16px;font-size:0.82rem;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#34d399;">👥 View Applicants</button>
+                        <button class="delete-btn" data-id="${job._id}">Delete</button>
+                    ` : ''}
                 </div>
             `;
 
@@ -343,6 +475,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (isOwner) {
+                // Edit button
+                jobCard.querySelector('.edit-job-btn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(job);
+                });
+                // View Applicants button
+                jobCard.querySelector('.view-applicants-btn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openApplicantsModal(job._id, job.title);
+                });
+                // Delete button
                 jobCard.querySelector('.delete-btn')?.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     showConfirm(`Delete the job posting "<strong>${escapeHtml(job.title)}</strong>"? This cannot be undone.`, async () => {
