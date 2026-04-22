@@ -68,6 +68,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setActiveNav();
 
+    // Companies: only show Dashboard + Profile, suppress chatbot
+    if (userType === 'company') {
+        document.getElementById('nav-analyze')?.remove();
+        document.getElementById('nav-roadmap')?.remove();
+        window._suppressChatbot = true;
+    }
+
     const candidateProfile = document.getElementById('candidate-profile');
     const companyProfile   = document.getElementById('company-profile');
     const candidateForm    = document.getElementById('candidate-profile-form');
@@ -153,8 +160,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Logout ───────────────────────────────────────────────────────
     document.getElementById('logout-btn')?.addEventListener('click', (e) => {
-        if(!confirm('Are you sure you want to log out?')) return;
         e.preventDefault();
+        if (!confirm('Are you sure you want to log out?')) return;
         localStorage.removeItem('user_id');
         localStorage.removeItem('username');
         localStorage.removeItem('user_type');

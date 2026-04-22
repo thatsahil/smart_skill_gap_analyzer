@@ -20,20 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Inject 'My Reports' nav link for candidates
-    if (_userType !== 'company') {
-        const navLinks = document.querySelector('.nav-links');
-        if (navLinks && !document.querySelector('a[href="reports.html"]')) {
-            const link = document.createElement('a');
-            link.href = 'reports.html';
-            link.textContent = 'My Reports';
-            navLinks.insertBefore(link, navLinks.querySelector('#logout-btn'));
-        }
-    }
-
     document.getElementById('logout-btn')?.addEventListener('click', (e) => {
-        if(!confirm('Are you sure you want to log out?')) return;
         e.preventDefault();
+        if (!confirm('Are you sure you want to log out?')) return;
         localStorage.clear();
         window.location.href = 'index.html';
     });
@@ -42,12 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     loadJobPostings();
     checkStoredResume();
+    loadMyReports();
 
     document.getElementById('analyze-btn').addEventListener('click', runAnalysis);
-
     document.getElementById('new-analysis-btn')?.addEventListener('click', resetPage);
     document.getElementById('save-report-btn')?.addEventListener('click', saveReport);
     document.getElementById('export-btn')?.addEventListener('click', () => window.print());
+    document.getElementById('refresh-reports-btn')?.addEventListener('click', loadMyReports);
 });
 
 // ── Auto-fill stored resume ────────────────────────────────────────────
@@ -304,8 +294,10 @@ async function saveReport() {
             })
         });
         if (res.ok) {
-            showError('✅ Report saved! View it in My Reports.', true);
+            showError('✅ Report saved!', true);
             btn.textContent = '✅ Saved';
+            // Reload the My Reports section
+            await loadMyReports();
         } else {
             const d = await res.json();
             showError(d.message || 'Failed to save report.');
@@ -317,6 +309,107 @@ async function saveReport() {
         btn.textContent = '💾 Save Report';
         btn.disabled = false;
     }
+}
+
+// ── My Reports (inline) ────────────────────────────────────────────────
+function _esc(s) {
+    return String(s || '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+async function loadMyReports() {
+    const loadingEl = document.getElementById('reports-loading');
+    const emptyEl   = document.getElementById('reports-empty');
+    const gridEl    = document.getElementById('reports-grid');
+    if (!loadingEl) return;
+
+    loadingEl.classList.remove('hidden');
+    gridEl.classList.add('hidden');
+    emptyEl.classList.add('hidden');
+    gridEl.innerHTML = '';
+
+    try {
+        const res     = await fetch(`${BACKEND}/api/reports?user_id=${_userId}`);
+        const reports = await res.json();
+        loadingEl.classList.add('hidden');
+
+        if (!Array.isArray(reports) || reports.length === 0) {
+            emptyEl.classList.remove('hidden');
+            return;
+        }
+        gridEl.classList.remove('hidden');
+        reports.forEach((report, idx) => {
+            const card = buildReportCard(report, idx);
+            gridEl.appendChild(card);
+        });
+    } catch {
+        loadingEl.innerHTML = '<p style="color:#fca5a5;">⚠️ Could not load reports.</p>';
+    }
+}
+
+function buildReportCard(report, idx) {
+    const card      = document.createElement('div');
+    card.className  = 'report-card';
+    card.style.animationDelay = (idx * 60) + 'ms';
+
+    const date     = _formatDate(report.created_at);
+    const gapCount = report.gap_count || 0;
+    const skills   = report.skills || [];
+    const snippet  = report.job_snippet || '';
+
+    const badgeClass = gapCount >= 6 ? 'high' : gapCount >= 3 ? 'medium' : 'low';
+    const badgeLabel = gapCount === 1 ? '1 gap' : `${gapCount} gaps`;
+
+    const SHOW = 5;
+    const visible = skills.slice(0, SHOW);
+    const extra   = skills.length - SHOW;
+    const skillTagsHTML = visible.map(s =>
+        `<span class="skill-tag" title="Click to build roadmap"
+              onclick="sessionStorage.setItem('roadmap_prefill','${_esc(s.skill)}');window.location.href='skill-gap-reports.html'">
+            ${_esc(s.skill)}
+        </span>`
+    ).join('') + (extra > 0 ? `<span class="skill-tag skill-tag-more">+${extra} more</span>` : '');
+
+    card.innerHTML = `
+        <div class="report-card-header">
+            <span class="report-date">📅 ${date}</span>
+            <span class="gap-badge ${badgeClass}">⚡ ${badgeLabel}</span>
+        </div>
+        ${snippet ? `<p class="report-snippet">"${_esc(snippet)}"</p>` : ''}
+        <div class="report-skills-label">Skills to develop</div>
+        <div class="report-skills-tags">${skillTagsHTML || '<span class="skill-tag skill-tag-more" style="cursor:default">No skills recorded</span>'}</div>
+        <div class="report-card-footer">
+            <a href="analyze.html">Run a new analysis →</a>
+            <button class="delete-report-btn" data-id="${report._id}">🗑 Delete</button>
+        </div>
+    `;
+
+    card.querySelector('.delete-report-btn')?.addEventListener('click', async () => {
+        if (!confirm('Delete this report? This cannot be undone.')) return;
+        try {
+            const r = await fetch(`${BACKEND}/api/reports/${report._id}?user_id=${_userId}`, { method: 'DELETE' });
+            if (r.ok) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(async () => { await loadMyReports(); }, 320);
+            } else {
+                showError('Could not delete report.');
+            }
+        } catch { showError('Server error.'); }
+    });
+
+    return card;
+}
+
+function _formatDate(iso) {
+    if (!iso) return 'Unknown date';
+    try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+             + ' · ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    } catch { return iso; }
 }
 
 // ── Results Renderer ───────────────────────────────────────────────────

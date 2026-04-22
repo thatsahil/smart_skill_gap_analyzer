@@ -93,10 +93,6 @@
                             <h3>Manage Postings</h3>
                             <p>Edit or remove existing job listings.</p>
                         </div>
-                        <div class="feature-item" id="explore-jobs-card-comp">
-                            <h3>Market Overview</h3>
-                            <p>See what other companies are posting to stay competitive.</p>
-                        </div>
                     </div>
 
                     <div class="cta-buttons" style="margin-top:28px;">
@@ -106,7 +102,7 @@
 
                     <!-- Post Job Form -->
                     <div id="post-job-section" style="display:none;" class="post-job-panel">
-                        <div style="background:var(--bg-surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:32px;max-width:540px;margin-top:28px;">
+                        <div style="background:var(--bg-surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:32px;max-width:580px;margin-top:28px;">
                             <h3 style="font-size:1rem;font-weight:700;margin-bottom:20px;">Post a New Job</h3>
                             <form id="post-job-form">
                                 <div class="form-group">
@@ -116,6 +112,14 @@
                                 <div class="form-group">
                                     <label for="job-description">Job Description</label>
                                     <textarea id="job-description" name="description" rows="6" placeholder="Describe the role, responsibilities, and required skills…" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="job-required-skills">Required Skills <span style="color:rgba(255,255,255,0.35);font-weight:400;font-size:0.82rem;">(comma separated)</span></label>
+                                    <input type="text" id="job-required-skills" name="required_skills" placeholder="e.g. Python, React, Docker, SQL">
+                                </div>
+                                <div class="form-group">
+                                    <label for="job-last-date">Last Date to Apply</label>
+                                    <input type="date" id="job-last-date" name="last_date">
                                 </div>
                                 <button type="submit" class="btn" style="margin-top:4px;">Publish Job</button>
                             </form>
@@ -184,7 +188,29 @@
     <script src="js/dashboard.js"></script>
     <script src="js/chat-widget.js"></script>
 
-    <!-- Applicants Modal -->
+    <!-- 2-Step View Applications Modal -->
+    <div id="view-apps-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:10000;overflow-y:auto;padding:40px 16px;">
+        <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:18px;max-width:760px;margin:0 auto;padding:36px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h2 id="view-apps-modal-title" style="font-size:1.15rem;font-weight:700;color:#f1f5f9;">Your Job Postings</h2>
+                <button id="close-view-apps-modal" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <p style="font-size:0.82rem;color:rgba(255,255,255,0.35);margin-bottom:22px;" id="view-apps-modal-sub">Select a job to see its applicants</p>
+
+            <!-- Step 1: Jobs list -->
+            <div id="va-step-jobs">
+                <div id="va-jobs-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
+
+            <!-- Step 2: Applicants list -->
+            <div id="va-step-apps" style="display:none;">
+                <button id="va-back-btn" style="padding:7px 14px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#94a3b8;font-family:Inter,sans-serif;font-size:0.82rem;cursor:pointer;margin-bottom:20px;">&larr; Back to Jobs</button>
+                <div id="va-apps-list" style="display:flex;flex-direction:column;gap:14px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applicants Modal (for per-job view from job card) -->
     <div id="applicants-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:10000;overflow-y:auto;padding:40px 16px;">
         <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:720px;margin:0 auto;padding:36px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
@@ -196,8 +222,8 @@
     </div>
 
     <!-- Edit Job Modal -->
-    <div id="edit-job-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:10000;padding:40px 16px;display:none;align-items:center;justify-content:center;">
-        <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:540px;width:100%;padding:36px;">
+    <div id="edit-job-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:10000;padding:40px 16px;align-items:center;justify-content:center;">
+        <div style="background:#0f1320;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:580px;width:100%;padding:36px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
                 <h2 style="font-size:1.1rem;font-weight:700;color:#f1f5f9;">Edit Job Posting</h2>
                 <button id="close-edit-modal" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">✕</button>
@@ -210,7 +236,15 @@
                 </div>
                 <div class="form-group">
                     <label for="edit-job-desc">Job Description</label>
-                    <textarea id="edit-job-desc" rows="6" required placeholder="Describe the role…"></textarea>
+                    <textarea id="edit-job-desc" rows="5" required placeholder="Describe the role…"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-job-skills">Required Skills <span style="color:rgba(255,255,255,0.35);font-weight:400;font-size:0.82rem;">(comma separated)</span></label>
+                    <input type="text" id="edit-job-skills" placeholder="e.g. Python, React, Docker">
+                </div>
+                <div class="form-group">
+                    <label for="edit-job-last-date">Last Date to Apply</label>
+                    <input type="date" id="edit-job-last-date">
                 </div>
                 <button type="submit" class="btn" style="margin-top:4px;">Save Changes</button>
             </form>

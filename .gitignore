@@ -28,3 +28,7 @@ test.db
 # Uploads
 backend/uploads/
 documents/
+
+#extra folder
+smart_skill_gap_analyzer/
+data/

@@ -93,10 +93,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setActiveNav();
 
-    // Hide nav links that companies shouldn't see
+    // Companies: only show Dashboard + Profile in nav, no chatbot
     if (userType === 'company') {
         document.getElementById('nav-analyze')?.remove();
         document.getElementById('nav-roadmap')?.remove();
+        // Suppress chatbot for companies by setting a flag the widget reads
+        window._suppressChatbot = true;
     }
     // Admin: redirect to admin panel immediately
     if (userType === 'admin') {
@@ -171,14 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const viewAppsCard = document.getElementById('view-apps-card');
-    if (viewAppsCard) {
-        viewAppsCard.style.cursor = 'pointer';
-        viewAppsCard.addEventListener('click', () => {
-            showToast('Applications feature coming soon! This will show all candidates who applied to your job postings.', 'info');
-        });
-    }
-
     const managePostingsCard = document.getElementById('manage-postings-card');
     if (managePostingsCard) {
         managePostingsCard.style.cursor = 'pointer';
@@ -187,23 +181,122 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const exploreJobsCardComp = document.getElementById('explore-jobs-card-comp');
-    if (exploreJobsCardComp) {
-        exploreJobsCardComp.style.cursor = 'pointer';
-        exploreJobsCardComp.addEventListener('click', () => {
-            document.getElementById('job-listings-card')?.scrollIntoView({ behavior: 'smooth' });
-        });
+    // ── View Applications (company) — 2-step modal ─────────────────────
+    const viewAppsBtn  = document.getElementById('view-apps-btn');
+    const viewAppsCard = document.getElementById('view-apps-card');
+    if (viewAppsBtn) {
+        viewAppsBtn.addEventListener('click', (e) => { e.preventDefault(); openViewAppsModal(); });
+    }
+    if (viewAppsCard) {
+        viewAppsCard.style.cursor = 'pointer';
+        viewAppsCard.addEventListener('click', () => openViewAppsModal());
     }
 
-    // ── View Applications CTA button (company) ──────────────────────────
-    const viewAppsBtn = document.getElementById('view-apps-btn');
-    if (viewAppsBtn) {
-        viewAppsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // scroll to jobs list so user can click View Applicants on a specific job
-            document.getElementById('job-listings-card')?.scrollIntoView({ behavior: 'smooth' });
-            showToast('Click "👥 View Applicants" on a job card below to see who applied.', 'info');
-        });
+    const viewAppsModal    = document.getElementById('view-apps-modal');
+    const closeViewAppsBtn = document.getElementById('close-view-apps-modal');
+    const vaStepJobs       = document.getElementById('va-step-jobs');
+    const vaStepApps       = document.getElementById('va-step-apps');
+    const vaJobsList       = document.getElementById('va-jobs-list');
+    const vaAppsList       = document.getElementById('va-apps-list');
+    const vaBackBtn        = document.getElementById('va-back-btn');
+    const vaTitle          = document.getElementById('view-apps-modal-title');
+    const vaSub            = document.getElementById('view-apps-modal-sub');
+
+    closeViewAppsBtn?.addEventListener('click', () => { viewAppsModal.style.display = 'none'; });
+    viewAppsModal?.addEventListener('click', (e) => { if (e.target === viewAppsModal) viewAppsModal.style.display = 'none'; });
+    vaBackBtn?.addEventListener('click', () => {
+        vaStepApps.style.display = 'none';
+        vaStepJobs.style.display = 'block';
+        vaTitle.textContent = 'Your Job Postings';
+        vaSub.textContent   = 'Select a job to see its applicants';
+    });
+
+    async function openViewAppsModal() {
+        if (!viewAppsModal) return;
+        viewAppsModal.style.display = 'block';
+        vaStepJobs.style.display   = 'block';
+        vaStepApps.style.display   = 'none';
+        vaTitle.textContent = 'Your Job Postings';
+        vaSub.textContent   = 'Select a job to see its applicants';
+        vaJobsList.innerHTML = '<p style="color:#64748b;padding:16px 0;">Loading your jobs…</p>';
+
+        try {
+            const r    = await fetch(`http://127.0.0.1:5000/api/jobs/company/${userId}`);
+            const jobs = await r.json();
+            if (!Array.isArray(jobs) || jobs.length === 0) {
+                vaJobsList.innerHTML = '<p style="color:#94a3b8;padding:16px 0;">You have not posted any jobs yet.</p>';
+                return;
+            }
+            vaJobsList.innerHTML = '';
+            jobs.forEach(job => {
+                const expiredBadge = job.is_expired
+                    ? '<span style="background:rgba(239,68,68,0.15);color:#fca5a5;border-radius:6px;padding:2px 8px;font-size:0.7rem;font-weight:700;margin-left:8px;">EXPIRED</span>'
+                    : '';
+                const deadline = job.last_date
+                    ? `<span style="color:#64748b;font-size:0.75rem;"> · Deadline: ${new Date(job.last_date).toLocaleDateString()}</span>`
+                    : '';
+                const skillsPill = job.required_skills
+                    ? `<span style="color:#a78bfa;font-size:0.75rem;display:block;margin-top:4px;">🔍 ${escapeHtml(job.required_skills)}</span>`
+                    : '';
+
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:18px 20px;cursor:pointer;transition:border-color 0.15s;';
+                card.onmouseover = () => card.style.borderColor = 'rgba(124,106,247,0.4)';
+                card.onmouseout  = () => card.style.borderColor = 'rgba(255,255,255,0.1)';
+                card.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+                        <div style="flex:1;">
+                            <span style="font-weight:600;color:#f1f5f9;font-size:0.95rem;">${escapeHtml(job.title)}</span>${expiredBadge}
+                            ${deadline}
+                            ${skillsPill}
+                        </div>
+                        <span style="background:rgba(124,106,247,0.15);color:#a78bfa;border-radius:8px;padding:4px 12px;font-size:0.78rem;font-weight:700;white-space:nowrap;">${job.applicant_count || 0} applicant${job.applicant_count !== 1 ? 's' : ''}</span>
+                    </div>`;
+                card.addEventListener('click', () => loadJobApplicantsModal(job._id, job.title));
+                vaJobsList.appendChild(card);
+            });
+        } catch {
+            vaJobsList.innerHTML = '<p style="color:#fca5a5;padding:16px 0;">Could not load jobs. Make sure the server is running.</p>';
+        }
+    }
+
+    async function loadJobApplicantsModal(jobId, jobTitle) {
+        vaStepJobs.style.display = 'none';
+        vaStepApps.style.display = 'block';
+        vaTitle.textContent = jobTitle;
+        vaSub.textContent   = 'Applicants for this opening';
+        vaAppsList.innerHTML = '<p style="color:#64748b;">Loading applicants…</p>';
+
+        try {
+            const r    = await fetch(`http://127.0.0.1:5000/api/applications?job_id=${jobId}`);
+            const apps = await r.json();
+            if (!Array.isArray(apps) || apps.length === 0) {
+                vaAppsList.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:24px;">No applications received yet for this job.</p>';
+                return;
+            }
+            vaAppsList.innerHTML = '';
+            apps.forEach((app, idx) => {
+                const card = document.createElement('div');
+                card.style.cssText = `background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;animation:slideInToast 0.3s ease ${idx*50}ms both;`;
+                card.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <div>
+                            <p style="color:#f1f5f9;font-weight:600;font-size:0.95rem;margin-bottom:4px;">${escapeHtml(app.candidate_name || 'Unknown')}</p>
+                            <p style="color:#94a3b8;font-size:0.82rem;">${escapeHtml(app.candidate_email || '')}</p>
+                            ${app.candidate_skills ? `<p style="color:#a78bfa;font-size:0.78rem;margin-top:4px;">Skills: ${escapeHtml(app.candidate_skills)}</p>` : ''}
+                            <p style="color:#64748b;font-size:0.75rem;margin-top:6px;">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+                        </div>
+                        <div style="flex-shrink:0;">
+                            ${app.has_resume
+                                ? `<a href="http://127.0.0.1:5000/api/resume/download?user_id=${app.user_id}" target="_blank" style="padding:8px 14px;border-radius:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);color:#a78bfa;font-size:0.82rem;font-weight:600;text-decoration:none;white-space:nowrap;display:inline-block;">📄 View Resume</a>`
+                                : `<span style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);color:#64748b;font-size:0.82rem;">No Resume</span>`}
+                        </div>
+                    </div>`;
+                vaAppsList.appendChild(card);
+            });
+        } catch {
+            vaAppsList.innerHTML = '<p style="color:#fca5a5;">Failed to load applicants.</p>';
+        }
     }
 
     // ── Applicants Modal ────────────────────────────────────────────────
@@ -275,9 +368,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function openEditModal(job) {
-        document.getElementById('edit-job-id').value  = job._id;
-        document.getElementById('edit-job-title').value = job.title;
-        document.getElementById('edit-job-desc').value  = job.description;
+        document.getElementById('edit-job-id').value         = job._id;
+        document.getElementById('edit-job-title').value      = job.title;
+        document.getElementById('edit-job-desc').value       = job.description;
+        const skillsEl    = document.getElementById('edit-job-skills');
+        const lastDateEl  = document.getElementById('edit-job-last-date');
+        if (skillsEl)   skillsEl.value   = job.required_skills || '';
+        if (lastDateEl) lastDateEl.value = job.last_date ? job.last_date.substring(0, 10) : '';
         editJobModal.style.display = 'flex';
     }
 
@@ -288,6 +385,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const jobId = document.getElementById('edit-job-id').value;
             const title = document.getElementById('edit-job-title').value.trim();
             const desc  = document.getElementById('edit-job-desc').value.trim();
+            const skills    = document.getElementById('edit-job-skills')?.value.trim() || '';
+            const lastDate  = document.getElementById('edit-job-last-date')?.value || '';
             const submitBtn = editJobForm.querySelector('button[type="submit"]');
             submitBtn.textContent = 'Saving…';
             submitBtn.disabled = true;
@@ -295,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const r = await fetch(`http://127.0.0.1:5000/api/edit-job/${jobId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ company_id: userId, title, description: desc }),
+                    body: JSON.stringify({ company_id: userId, title, description: desc, required_skills: skills, last_date: lastDate }),
                 });
                 const d = await r.json();
                 if (r.ok) {
@@ -366,10 +465,22 @@ document.addEventListener('DOMContentLoaded', function () {
             jobCard.className = 'job-card';
             jobCard.dataset.jobId = job._id;
 
+            // Deadline & skills meta
+            const expiredBadge = job.is_expired
+                ? '<span style="background:rgba(239,68,68,0.15);color:#fca5a5;border-radius:6px;padding:2px 8px;font-size:0.7rem;font-weight:700;margin-left:8px;">CLOSED</span>'
+                : '';
+            const deadlineMeta = job.last_date
+                ? `<span style="display:inline-block;margin-top:6px;font-size:0.75rem;color:${job.is_expired ? '#fca5a5' : '#64748b'};">📅 Deadline: ${new Date(job.last_date).toLocaleDateString()}</span>`
+                : '';
+            const skillsMeta = job.required_skills
+                ? `<span style="display:block;margin-top:4px;font-size:0.75rem;color:#a78bfa;">🔍 ${escapeHtml(job.required_skills)}</span>`
+                : '';
+
             jobCard.innerHTML = `
-                <h3>${escapeHtml(job.title)}</h3>
+                <h3>${escapeHtml(job.title)}${expiredBadge}</h3>
                 <p class="company">${escapeHtml(job.company_name)}</p>
-                <p>${escapeHtml(job.description)}</p>
+                ${deadlineMeta}${skillsMeta}
+                <p style="margin-top:8px;">${escapeHtml(job.description)}</p>
                 <div class="score-chip-area"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
                     <button class="btn view-details-btn" data-id="${job._id}" style="width:auto;padding:7px 16px;font-size:0.82rem;">View Details</button>
@@ -417,38 +528,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 const applyBtn = document.createElement('button');
-                applyBtn.className = 'btn-apply';
                 applyBtn.dataset.jobId = job._id;
-                applyBtn.textContent = '✉ Apply';
-                applyBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    applyBtn.textContent = 'Applying…';
+
+                if (job.is_expired) {
+                    // Deadline passed — block application
+                    applyBtn.className = 'btn-apply applied';
+                    applyBtn.textContent = '🔒 Closed';
                     applyBtn.disabled = true;
-                    try {
-                        const r = await fetch('http://127.0.0.1:5000/api/apply', {
-                            method:  'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body:    JSON.stringify({ user_id: userId, job_id: job._id }),
-                        });
-                        const d = await r.json();
-                        if (r.ok) {
-                            showToast('Application submitted! 🎉', 'success');
-                            applyBtn.textContent = '✅ Applied';
-                            applyBtn.classList.add('applied');
-                        } else if (r.status === 409) {
-                            applyBtn.textContent = '✅ Already Applied';
-                            applyBtn.classList.add('applied');
-                        } else {
-                            showToast(d.message || 'Application failed.', 'error');
+                    applyBtn.title = 'The application deadline for this job has passed.';
+                } else {
+                    applyBtn.className = 'btn-apply';
+                    applyBtn.textContent = '✉ Apply';
+                    applyBtn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        applyBtn.textContent = 'Applying…';
+                        applyBtn.disabled = true;
+                        try {
+                            const r = await fetch('http://127.0.0.1:5000/api/apply', {
+                                method:  'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body:    JSON.stringify({ user_id: userId, job_id: job._id }),
+                            });
+                            const d = await r.json();
+                            if (r.ok) {
+                                showToast('Application submitted! 🎉', 'success');
+                                applyBtn.textContent = '✅ Applied';
+                                applyBtn.classList.add('applied');
+                            } else if (r.status === 409) {
+                                applyBtn.textContent = '✅ Already Applied';
+                                applyBtn.classList.add('applied');
+                            } else if (r.status === 403) {
+                                showToast(d.message || 'Application deadline has passed.', 'warning');
+                                applyBtn.textContent = '🔒 Closed';
+                                applyBtn.classList.add('applied');
+                            } else {
+                                showToast(d.message || 'Application failed.', 'error');
+                                applyBtn.textContent = '✉ Apply';
+                                applyBtn.disabled = false;
+                            }
+                        } catch {
+                            showToast('Server error.', 'error');
                             applyBtn.textContent = '✉ Apply';
                             applyBtn.disabled = false;
                         }
-                    } catch {
-                        showToast('Server error.', 'error');
-                        applyBtn.textContent = '✉ Apply';
-                        applyBtn.disabled = false;
-                    }
-                });
+                    });
+                }
 
                 actionsRow.appendChild(fitBtn);
                 actionsRow.appendChild(applyBtn);
@@ -579,10 +703,12 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const formData = new FormData(postJobForm);
             const jsonData = {
-                title:        formData.get('title'),
-                description:  formData.get('description'),
-                company_id:   userId,
-                company_name: storedUsername
+                title:           formData.get('title'),
+                description:     formData.get('description'),
+                required_skills: formData.get('required_skills') || '',
+                last_date:       formData.get('last_date') || '',
+                company_id:      userId,
+                company_name:    storedUsername
             };
 
             const submitBtn = postJobForm.querySelector('button[type="submit"]');
@@ -600,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showToast('Job posted successfully! It is now visible to all candidates.', 'success');
                     postJobForm.reset();
                     postJobSection.style.display = 'none';
-                    await loadAllJobs(); // Reload jobs list
+                    await loadAllJobs();
                 } else {
                     showToast(`Error: ${result.message}`, 'error');
                 }
@@ -618,8 +744,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('logout-btn');
     if (logoutButton) {
         logoutButton.addEventListener('click', function (event) {
-            if(!confirm('Are you sure you want to log out?')) return;
             event.preventDefault();
+            if (!confirm('Are you sure you want to log out?')) return;
             localStorage.removeItem('user_id');
             localStorage.removeItem('username');
             localStorage.removeItem('user_type');

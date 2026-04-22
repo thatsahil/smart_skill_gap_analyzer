@@ -279,7 +279,8 @@ function hideToast() {
     document.getElementById('error-toast').classList.add('hidden');
 }
 
-function handleLogout() {
+function handleLogout(e) {
+    if (e) e.preventDefault();
     if(!confirm('Are you sure you want to log out?')) return;
     localStorage.removeItem('user_id');
     window.location.href = 'index.html';

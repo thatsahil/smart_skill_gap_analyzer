@@ -1,21 +1,45 @@
 # Skill Gap Analyzer for Job Seekers
 
 ## Overview
-The Skill Gap Analyzer is an intelligent platform designed to help job seekers identify the missing skills needed to land their dream roles. By leveraging advanced Natural Language Processing (NLP) and Generative AI, the application compares a candidate's resume against a specific job description to find semantic gaps and generates a personalized learning path.
+The Skill Gap Analyzer is an intelligent, multi-role platform designed to help job seekers identify missing skills needed to land their dream roles. By leveraging SBERT (Sentence-BERT) for semantic analysis and the Google Gemini API for AI-powered recommendations, the application bridges the gap between a candidate's current profile and a target job description — all within a unified dashboard for Candidates, Companies, and an Admin.
+
+---
 
 ## Key Features
-1. **Semantic Resume Parsing**: Uses SBERT (Sentence-BERT) to semantically match the skills in a candidate's PDF resume against a Job Description.
-2. **AI-Powered Gap Analysis**: Integrates with the Google Gemini API to analyze identified skill gaps and provide targeted reasoning for why each missing skill is necessary.
-3. **Personalized Learning Roadmaps**: Generates step-by-step, actionable roadmaps with curated online resources to master missing skills.
-4. **AI Career Coach**: Includes an interactive AI chat widget to assist candidates with interview preparation, resume tips, and career advice.
-5. **Job Board Integration**: Stores and manages existing job postings in a MongoDB database to streamline the analysis process.
+
+### Candidate
+1. **Semantic Resume Analysis** — Upload a PDF resume + job description (text/PDF/posted job) and get an SBERT-powered semantic skill gap analysis.
+2. **AI-Powered Recommendations** — Gemini API generates targeted learning resources for every identified skill gap.
+3. **Personalized Learning Roadmaps** — Step-by-step roadmaps with curated resources for missing skills.
+4. **My Reports (inline)** — Saved analysis reports displayed directly on the Analyze page, no separate page required. Reports can be deleted individually.
+5. **AI Career Coach** — Interactive chat widget for interview prep, resume tips, and career advice (candidates only).
+6. **Job Board + Apply** — Browse all job openings, check fit score vs your resume, and apply with one click.
+7. **Deadline Enforcement** — Jobs past their application deadline show a "CLOSED" badge; the Apply button is disabled.
+
+### Company
+1. **Post Jobs** — Create job openings with Title, Description, Required Skills, and Last Date to Apply.
+2. **Manage Postings** — Edit or delete your job listings from the dashboard.
+3. **View Applications (2-Step Modal)** — Click "View Applications" → see your jobs with applicant counts → select a job to see each applicant's name, email, skills, and download their resume PDF.
+4. **Restricted Navigation** — Company accounts see only Dashboard and Profile in the nav bar. Chatbot, Analyze, and Roadmap are hidden.
+
+### Admin
+1. **Platform Overview** — Live stats: total users, candidates, companies, jobs posted, applications, reports.
+2. **Seed Demo Users** — One-click button to populate 12 demo candidates + 4 demo companies.
+3. **User Management** — View, search, and delete any user account.
+4. **Job Management** — View and delete any job posting platform-wide.
+5. **Application Management** — View all applications with resume download links.
+6. **🎯 Cluster Resumes** — Group all candidates by tech role (Frontend Developer, Backend Developer, DevOps, AI/ML, etc.) using keyword matching on skills, experience, and role fields. Admin can select any cluster to see matching candidates and their resume links.
+
+---
 
 ## Tech Stack
 - **Frontend**: HTML5, Vanilla CSS, Vanilla JavaScript
-- **Backend**: Python, Flask, Flask-CORS
+- **Backend**: Python 3.10+, Flask, Flask-CORS
 - **Database**: MongoDB (via PyMongo)
-- **AI/NLP**: Google Gemini (via API), `sentence-transformers` (SBERT), `nltk`
+- **AI/NLP**: Google Gemini API, `sentence-transformers` (SBERT), `nltk`
 - **PDF Processing**: `pdfplumber`
+
+---
 
 ## Setup and Installation
 
@@ -26,228 +50,236 @@ cd skill-gap-analyzer
 ```
 
 ### 2. Configure Environment Variables
-Create a `.env` file in the root directory (you can copy from `.env.example`) and add your Gemini API Key:
+Create a `.env` file in the `backend/` directory:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
-*(Note: Keep your `.env` file secure and do not commit it to version control!)*
+*(Do not commit `.env` to version control)*
 
 ### 3. Setup the Backend
-Navigate to the backend directory and install the required Python dependencies:
 ```bash
 cd backend
 pip install -r requirements.txt
-```
-
-*(Note: Ensure you have MongoDB running locally or update the connection string in `backend/models/database.py`).*
-
-### 4. Run the Application
-Start the Flask development server from the backend directory:
-```bash
 python app.py
 ```
-The server will start on `http://127.0.0.1:5000`. It acts as the API and serves the frontend static files. Open the URL in your browser to access the app!
+Backend runs at `http://127.0.0.1:5000`
 
-## Project Structure
-- `/frontend`: Contains all the HTML, CSS, and JS files for the user interface.
-- `/backend`: Contains the Flask server, routing logic, and AI models.
-  - `/backend/models`: Modular architecture (auth, analyze, chatbot, resume, database).
+### 4. Access the Frontend
+Open `http://127.0.0.1:5000` in your browser (Flask serves the frontend).
 
-## Security
-- API keys are handled securely via environment variables (`.env`). The repository is already configured with `.gitignore` to prevent your `.env` file from being accidentally committed to GitHub.
+### 5. Create the Admin Account (first time only)
+```bash
+curl -X POST http://127.0.0.1:5000/api/admin/seed
+```
+
+### 6. Seed Demo Users & Companies
+Log in as admin → Overview panel → click **🪄 Seed Demo Users & Companies**, or:
+```bash
+curl -X POST "http://127.0.0.1:5000/api/admin/seed-demo?admin_id=<YOUR_ADMIN_ID>"
+```
+
+---
+
+## Demo Credentials
+
+### Admin Account
+| Email | Password |
+|-------|----------|
+| `admin@skillgap.io` | `Admin@12345` |
+
+### Demo Candidates (12 users)
+**All passwords:** `Demo@12345`
+
+| Name | Email | Role / Skills |
+|------|-------|---------------|
+| Aisha Khan | `aisha.khan@demo.com` | Frontend Developer — React, JS, CSS, Next.js |
+| Rohan Mehta | `rohan.mehta@demo.com` | Backend Developer — Node.js, Express, MongoDB |
+| Priya Sharma | `priya.sharma@demo.com` | Backend Developer — Python, Django, Flask |
+| Arjun Nair | `arjun.nair@demo.com` | Full Stack Developer — React, Node, AWS, Docker |
+| Sneha Patel | `sneha.patel@demo.com` | AI/ML Engineer — TensorFlow, PyTorch, NLP |
+| Vikram Singh | `vikram.singh@demo.com` | DevOps Engineer — AWS, Kubernetes, Terraform |
+| Meera Iyer | `meera.iyer@demo.com` | Mobile Developer — Flutter, Android, iOS |
+| Rahul Gupta | `rahul.gupta@demo.com` | Data Engineer — Spark, Kafka, Airflow, BigQuery |
+| Divya Reddy | `divya.reddy@demo.com` | Database Administrator — MySQL, PostgreSQL, Oracle |
+| Karan Bhatt | `karan.bhatt@demo.com` | Cybersecurity — Pen Testing, SIEM, SOC |
+| Anjali Verma | `anjali.verma@demo.com` | Frontend Developer — Vue.js, Angular, Figma |
+| Siddharth Joshi | `siddharth.joshi@demo.com` | QA Engineer — Selenium, Cypress, Pytest |
+
+### Demo Companies (4 accounts)
+**All passwords:** `Demo@12345`
+
+| Company | Email | Industry |
+|---------|-------|----------|
+| TechNova Solutions | `hr@technova.demo` | Software Development |
+| DataPulse Analytics | `careers@datapulse.demo` | Data & Analytics |
+| FinSecure Corp | `jobs@finsecure.demo` | FinTech & Cybersecurity |
+| MobileCraft Studio | `talent@mobilecraft.demo` | Mobile Applications |
+
+### Demo Job Postings (8 jobs — pre-seeded)
+
+| Job Title | Company | Required Skills | Deadline |
+|-----------|---------|-----------------|----------|
+| Senior React Developer | TechNova Solutions | React, TypeScript, Redux | 2026-06-30 |
+| DevOps Engineer | TechNova Solutions | Docker, Kubernetes, AWS | 2026-05-31 |
+| Backend Python Developer | TechNova Solutions | Python, Flask, PostgreSQL | 2026-06-15 |
+| Data Engineer - Spark & Kafka | DataPulse Analytics | Spark, Kafka, Airflow | 2026-06-20 |
+| ML Engineer | DataPulse Analytics | TensorFlow, PyTorch, NLP | 2026-07-01 |
+| Cybersecurity Analyst | FinSecure Corp | SIEM, SOC, Pen Testing | 2026-05-25 |
+| QA Automation Engineer | FinSecure Corp | Selenium, Cypress, Pytest | 2026-07-15 |
+| Flutter Mobile Developer | MobileCraft Studio | Flutter, Dart, Firebase | 2026-06-10 |
 
 ---
 
 ## Admin Panel
 
-A master `admin` profile is built into the platform with full control over all data.
+### Access
+URL: `/admin.html` — only accessible to admin accounts.
 
-### Admin Credentials
-| Field    | Value               |
-|----------|---------------------|
-| Email    | `admin@skillgap.io` |
-| Password | `Admin@12345`       |
+### Capabilities
+- 📊 **Overview** — Platform stats + **🪄 Seed Demo Users & Companies** button
+- 👥 **Users** — Search, view, and delete all user accounts
+- 💼 **Jobs** — View all job postings with applicant count, delete any
+- 📄 **Applications** — All applications with candidate details and resume links
+- 🎯 **Cluster Resumes** — Role-based clustering of all candidates
 
-### First-time Setup
-On first run, seed the admin account by calling:
-```bash
-curl -X POST http://127.0.0.1:5000/api/admin/seed
-```
-Or in PowerShell:
-```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:5000/api/admin/seed" -Method POST -ContentType "application/json" -Body "{}"
-```
-After seeding, log in at `/login.html` and you will be automatically redirected to `/admin.html`.
+### Resume Clustering
+The admin Cluster Resumes panel categorises all candidate profiles into tech domains:
 
-### Admin Capabilities
-- 📊 **Overview** — Platform-wide stats (total users, candidates, companies, jobs, applications, reports)
-- 👥 **Users** — View, search, and delete any candidate or company account
-- 💼 **Jobs** — View and delete any job posting across all companies
-- 📄 **Applications** — View all applications, download candidate resumes
+| Cluster | Keywords Matched |
+|---------|-----------------|
+| Frontend Developer | React, Vue, Angular, HTML, CSS, Next.js |
+| Backend Developer | Node.js, Django, Flask, Express, REST API |
+| Full Stack Developer | MERN, MEAN, Full Stack |
+| Data Scientist | ML, TensorFlow, PyTorch, Pandas, Jupyter |
+| Data Engineer | Spark, Kafka, Airflow, ETL, BigQuery |
+| DevOps Engineer | Docker, Kubernetes, AWS, Terraform, CI/CD |
+| Mobile Developer | Flutter, Android, iOS, React Native |
+| AI/ML Engineer | NLP, LLM, Computer Vision, BERT, GPT |
+| Cybersecurity | SIEM, SOC, Pen Testing, Firewall |
+| QA Engineer | Selenium, Cypress, Pytest, Automation Testing |
+| Database Administrator | MySQL, PostgreSQL, MongoDB, Oracle |
+| Cloud Engineer | AWS, Azure, GCP, Serverless |
+
+API: `GET /api/admin/cluster-candidates?admin_id=<id>&role=Frontend Developer`
 
 ---
 
-## Recent Changes
+## Backend API Reference
 
-### Company Dashboard Improvements
-- Companies can now **view applicants** for each job posting — click the `👥 View Applicants` button on any job card to open a modal showing each applicant's name, email, skills, and a link to download their resume PDF.
-- Companies can now **edit their job postings** — click the `✏️ Edit` button on any owned job card to update the title or description in-place without re-posting.
-- **Roadmap** and **Analyze** navigation links are hidden for company accounts — these features are candidate-only.
-
-### New Backend Endpoints
 | Method | Route | Description |
 |--------|-------|-------------|
-| `POST` | `/api/admin/seed` | Create the admin account (run once) |
-| `GET`  | `/api/admin/stats` | Platform usage statistics |
+| `POST` | `/api/register` | Register a new user |
+| `POST` | `/api/login` | Login and get user session data |
+| `GET`  | `/api/profile` | Get user profile |
+| `PUT`  | `/api/update-profile` | Update user profile |
+| `POST` | `/api/upload-resume` | Upload candidate PDF resume |
+| `GET`  | `/api/resume` | Check if resume exists |
+| `GET`  | `/api/resume/download` | Download a resume PDF |
+| `POST` | `/api/analyze` | Run SBERT + Gemini skill gap analysis |
+| `POST` | `/api/match-score` | Compute resume-to-job fit score |
+| `POST` | `/api/save-report` | Save an analysis report |
+| `GET`  | `/api/reports` | List saved reports for a user |
+| `DELETE` | `/api/reports/<id>` | Delete a saved report |
+| `GET`  | `/api/jobs` | List all jobs (with `is_expired` flag) |
+| `GET`  | `/api/jobs/company/<id>` | List jobs by company with applicant counts |
+| `POST` | `/api/post-job` | Post a new job (with `required_skills`, `last_date`) |
+| `PUT`  | `/api/edit-job/<id>` | Edit a job posting |
+| `DELETE` | `/api/delete-job/<id>` | Delete a job |
+| `POST` | `/api/apply` | Apply to a job (deadline-enforced) |
+| `GET`  | `/api/applications` | List applications by job_id or user_id |
+| `POST` | `/api/admin/seed` | Create the admin account |
+| `POST` | `/api/admin/seed-demo` | Seed 12 demo candidates + 4 companies |
+| `GET`  | `/api/admin/stats` | Platform-wide statistics |
 | `GET`  | `/api/admin/users` | List all users |
 | `DELETE` | `/api/admin/users/<id>` | Delete a user |
 | `PATCH` | `/api/admin/users/<id>` | Update a user |
-| `GET`  | `/api/admin/jobs` | List all jobs with applicant counts |
-| `DELETE` | `/api/admin/jobs/<id>` | Delete a job and its applications |
-| `GET`  | `/api/admin/applications` | List all applications |
-| `DELETE` | `/api/admin/applications/<id>` | Remove an application |
-| `PUT`  | `/api/edit-job/<id>` | Company edits their own job posting |
+| `GET`  | `/api/admin/jobs` | All jobs with applicant counts (admin) |
+| `DELETE` | `/api/admin/jobs/<id>` | Delete any job |
+| `GET`  | `/api/admin/applications` | All applications (admin) |
+| `GET`  | `/api/admin/cluster-candidates` | Cluster candidates by role |
+| `POST` | `/api/chatbot` | AI career coach (candidates only) |
+| `POST` | `/api/skill-roadmap` | Generate skill roadmap |
 
-### Project Structure Update
+---
+
+## Project Structure
+
 ```
-/backend/models/
-  ├── admin.py      ← NEW: Master admin API (all CRUD + stats + seed)
-  ├── auth.py       ← UPDATED: Admin login redirects to admin.html
-  ├── jobs.py       ← UPDATED: Edit-job endpoint; applications enriched with candidate email & resume info
-  ├── analyze.py
-  ├── resume.py
-  ├── reports.py
-  ├── chatbot.py
-  ├── database.py
-  └── utils.py
-
-/frontend/
-  ├── admin.html    ← NEW: Full admin panel UI
-  ├── js/admin.js   ← NEW: Admin panel logic
-  ├── dashboard.html ← UPDATED: Applicants modal + Edit-job modal + Admin section
-  └── js/dashboard.js ← UPDATED: Company nav filtering, modals wired up
+smart_skill_gap_analyzer/
+├── backend/
+│   ├── app.py                  ← Flask entry point
+│   ├── models/
+│   │   ├── admin.py            ← Admin CRUD, stats, cluster, seed-demo
+│   │   ├── auth.py             ← Login, register, profile
+│   │   ├── jobs.py             ← Jobs CRUD + deadline enforcement + company job list
+│   │   ├── analyze.py          ← SBERT + Gemini analysis pipeline
+│   │   ├── resume.py           ← PDF upload/download/match-score
+│   │   ├── reports.py          ← Save/list/delete reports
+│   │   ├── chatbot.py          ← Gemini career chat
+│   │   ├── database.py         ← MongoDB connection
+│   │   └── utils.py            ← SBERT semantic gap helpers
+│   └── uploads/                ← Candidate resume PDFs (gitignored)
+│
+├── frontend/
+│   ├── index.html              ← Public landing page
+│   ├── login.html              ← Login page
+│   ├── register.html           ← Registration page
+│   ├── dashboard.html          ← Multi-role dashboard (Candidate/Company/Admin)
+│   ├── analyze.html            ← Skill gap analysis + My Reports (inline)
+│   ├── skill-gap-reports.html  ← Learning roadmap generator
+│   ├── profile.html            ← User/company profile management
+│   ├── admin.html              ← Admin panel (admin only)
+│   ├── css/
+│   │   ├── style.css
+│   │   ├── analyze.css
+│   │   └── dashboard.css
+│   └── js/
+│       ├── dashboard.js        ← Dashboard logic, job listings, modals
+│       ├── analyze.js          ← Analysis + inline My Reports
+│       ├── admin.js            ← Admin panel, cluster, seed
+│       ├── profile.js          ← Profile management
+│       ├── chat-widget.js      ← AI career chatbot (candidates only)
+│       └── reports.js          ← (legacy — reports now embedded in analyze.js)
+│
+├── documents/                  ← Project documentation
+├── readme.md
+└── .gitignore
 ```
 
 ---
 
-## How SBERT Works (with Example)
+## Recent Changes (v2.0)
 
-### What is SBERT?
-**SBERT (Sentence-BERT)** is a modification of the BERT model that produces a single fixed-size **embedding vector** for any text input. Two vectors can then be compared using **cosine similarity** — a score between `0.0` (no relation) and `1.0` (identical meaning).
+### Analyze Page — My Reports Inline
+- **Removed** the separate `reports.html` page / "My Reports" nav link.
+- Reports are now displayed **directly at the bottom of the Analyze page** in a responsive card grid.
+- After saving a report, the grid refreshes automatically.
+- Each report card has a **🗑 Delete** button backed by `DELETE /api/reports/<id>`.
 
-The model used is `all-MiniLM-L6-v2` — a lightweight 22M parameter model producing 384-dimensional vectors.
+### Job Management — New Fields
+- **Required Skills** — comma-separated skills field on the post/edit job form.
+- **Last Date to Apply** — date picker for application deadline.
+- Job cards display the deadline date and required skills.
+- Jobs past their deadline show a **CLOSED** badge; the Apply button is disabled (enforced both frontend and backend).
 
----
+### Company Dashboard
+- ❌ Removed **Market Overview** card.
+- ✅ Added **View Applications (2-step modal)**:
+  - Step 1: Lists all jobs posted by the company with applicant counts and deadline info.
+  - Step 2: Click a job → see each applicant's name, email, skills, applied date, and a resume download link.
+- Post-job and Edit-job forms now include Required Skills and Last Date fields.
 
-### Stage 1 — WordPiece Tokenization (sub-word)
+### Company Navigation Restriction
+- Company accounts see **only Dashboard and Profile** in the navigation bar.
+- Roadmap, Analyze, and the AI Chatbot are completely hidden for company users.
 
-SBERT does not tokenize by whole word. It uses a **WordPiece tokenizer** that breaks words into sub-word pieces:
+### Admin Panel — Cluster Resumes
+- New **🎯 Cluster Resumes** panel in the admin sidebar.
+- Overview cards show candidate count per tech domain.
+- Select a role to drill into a table of matching candidates with resume download links.
+- **🪄 Seed Demo Users & Companies** button in the Overview panel.
 
-```
-"Kubernetes"   → ["Ku", "##ber", "##net", "##es"]
-"unsupervised" → ["un", "##super", "##vised"]
-"Python"       → ["Python"]         ← common word, stays whole
-"CI/CD"        → ["CI", "/", "CD"]
-```
-
-The `##` prefix means *"this piece continues the previous token"*. This means rare or technical words are never fully discarded — they survive as meaningful fragments.
-
----
-
-### Stage 2 — Self-Attention Transformer (context is computed here)
-
-Every token is enriched by attending to **every other token** in the same sequence simultaneously. This is not sequential — it is a full all-to-all attention:
-
-```
-Input: "Must have experience with Docker and Kubernetes orchestration"
-
-Token:     Must  have  experience  with  Docker  and  Kubernetes  orchestration
-                                           ↕            ↕
-           ← every token attends to every other token simultaneously →
-```
-
-This means `"orchestration"` carries information from `"Kubernetes"` and `"Docker"` baked into it. No token is ever read in isolation.
-
-**Crucially — this is NOT a sliding/overlapping window.** Within a single input, BERT uses full attention. The overlapping concept only becomes relevant when splitting *very long documents* across multiple calls (see below).
-
----
-
-### Stage 3 — Mean Pooling (tokens → one vector)
-
-After the transformer layers, each token has its own 384-dim vector. SBERT averages them all into **one sentence-level vector**:
-
-```
-sentence_vector = mean(token_0_vector, token_1_vector, ..., token_n_vector)
-                          ↓
-                   [384 numbers]  ← represents the meaning of the whole input
-```
-
----
-
-### Stage 4 — Cosine Similarity (finding gaps)
-
-In `utils.py`, every JD skill is compared against every resume skill:
-
-```python
-cos_scores = sbert_util.cos_sim(jd_emb, resume_emb)  # shape: [n_jd, n_resume]
-max_scores = cos_scores.max(dim=1).values             # best match per JD skill
-```
-
-**Worked Example:**
-
-Resume skills extracted: `["Python", "Flask", "AWS", "REST API"]`
-JD skills extracted: `["Kubernetes", "Docker", "Kafka", "Python", "CI/CD"]`
-
-Cosine similarity matrix:
-
-|            | Python | Flask | AWS  | REST API |
-|------------|--------|-------|------|----------|
-| Kubernetes | 0.22   | 0.18  | 0.31 | 0.20     |
-| Docker     | 0.24   | 0.20  | 0.33 | 0.22     |
-| Kafka      | 0.19   | 0.15  | 0.25 | 0.21     |
-| **Python** | **0.99**| 0.60 | 0.32 | 0.45     |
-| CI/CD      | 0.25   | 0.22  | 0.40 | 0.30     |
-
-`max(dim=1)` → best score each JD skill got:
-
-| JD Skill   | Best Score | vs Threshold (0.55) | Result      |
-|------------|------------|----------------------|-------------|
-| Kubernetes | 0.31       | below                | ✅ GAP       |
-| Docker     | 0.35       | below                | ✅ GAP       |
-| Kafka      | 0.25       | below                | ✅ GAP       |
-| Python     | 0.99       | above                | ❌ Covered  |
-| CI/CD      | 0.40       | below                | ✅ GAP       |
-
-The gaps list `["Kubernetes", "Docker", "Kafka", "CI/CD"]` is then handed to **Gemini** for explanation and learning resources.
-
----
-
-### Why SBERT beats simple keyword matching
-
-| Scenario | Keyword Match | SBERT |
-|----------|--------------|-------|
-| `"ML"` vs `"Machine Learning"` | ❌ Miss | ✅ ~0.91 |
-| `"Node"` vs `"Node.js"` | ❌ Miss | ✅ ~0.95 |
-| `"container orchestration"` vs `"Kubernetes"` | ❌ Miss | ✅ ~0.72 |
-| `"REST"` vs `"RESTful API"` | ❌ Miss | ✅ ~0.88 |
-
-SBERT understands **semantic meaning**, not just character patterns.
-
----
-
-### The Token Limit & Why It's Not a Problem Here
-
-`all-MiniLM-L6-v2` has a hard limit of **256 tokens**. Beyond that, text is **silently truncated**.
-
-This project avoids the problem entirely:
-- **Skill extraction first** (`extract_skills_from_text`) reduces inputs to short keyword terms before encoding.
-- **Sentence fallback** (`nltk.sent_tokenize`) splits text into individual sentences — each well under 256 tokens.
-- SBERT is never called on a raw full-length resume or job description as one blob.
-
-If full-document encoding were needed, a **sliding window with overlap** would be required:
-```
-Doc tokens:  [0 ─────────── 255][overlap: 206─255][206 ──────────── 460] ...
-                Window 1                              Window 2
-→ then average the resulting vectors across all windows
-```
-But this is unnecessary for the current architecture.
+### Backend
+- `jobs.py`: Added `required_skills`, `last_date` fields; deadline validation on `/api/apply`; `GET /api/jobs/company/<id>` with applicant counts.
+- `reports.py`: Added `DELETE /api/reports/<id>`.
+- `admin.py`: Added `/api/admin/cluster-candidates` and `/api/admin/seed-demo`.

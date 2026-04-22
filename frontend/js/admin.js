@@ -44,6 +44,7 @@ const panelTitles = {
     'panel-users':    ['Users',    'Manage all user accounts'],
     'panel-jobs':     ['Jobs',     'Manage all job postings'],
     'panel-apps':     ['Applications', 'All candidate applications'],
+    'panel-cluster':  ['Cluster Resumes', 'Group candidates by role for company requests'],
 };
 
 function switchPanel(panelId) {
@@ -57,10 +58,10 @@ function switchPanel(panelId) {
     document.getElementById('panel-title').textContent = title;
     document.getElementById('panel-subtitle').textContent = sub;
 
-    // Lazy-load data on first open
-    if (panelId === 'panel-users') loadUsers();
-    if (panelId === 'panel-jobs')  loadJobs();
-    if (panelId === 'panel-apps')  loadApps();
+    if (panelId === 'panel-users')   loadUsers();
+    if (panelId === 'panel-jobs')    loadJobs();
+    if (panelId === 'panel-apps')    loadApps();
+    if (panelId === 'panel-cluster') loadClusterOverview();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────
@@ -137,6 +138,111 @@ document.getElementById('user-search')?.addEventListener('input', (e) => {
         u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     ));
 });
+
+// ── Seed Demo Users ─────────────────────────────────────────────────────
+async function seedDemoUsers() {
+    const btn = document.getElementById('seed-demo-btn');
+    if (btn) { btn.textContent = '🔄 Seeding…'; btn.disabled = true; }
+    try {
+        const r = await fetch(`${API}/api/admin/seed-demo?admin_id=${adminId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_id: adminId })
+        });
+        const d = await r.json();
+        if (r.ok) {
+            showToast(d.message, 'success');
+            loadStats();
+        } else {
+            showToast(d.message || 'Seeding failed.', 'error');
+        }
+    } catch { showToast('Server error.', 'error'); }
+    finally {
+        if (btn) { btn.textContent = '🪄 Seed Demo Users & Companies'; btn.disabled = false; }
+    }
+}
+document.getElementById('seed-demo-btn')?.addEventListener('click', seedDemoUsers);
+
+// ── Cluster Resumes ─────────────────────────────────────────────────────
+let clusterRoles = [];
+let clusterLoaded = false;
+
+async function loadClusterOverview() {
+    if (clusterLoaded) return;
+    const overview = document.getElementById('cluster-overview');
+    overview.innerHTML = '<p style="color:#64748b;font-size:0.85rem;">Loading clusters…</p>';
+    try {
+        const r = await fetch(`${API}/api/admin/cluster-candidates?admin_id=${adminId}`);
+        const d = await r.json();
+        if (!r.ok) { overview.innerHTML = '<p style="color:#fca5a5;">Failed to load clusters.</p>'; return; }
+        clusterRoles = d.roles || [];
+        // Populate select
+        const sel = document.getElementById('cluster-role-select');
+        sel.innerHTML = '<option value="">All Clusters (Overview)</option>' +
+            clusterRoles.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join('');
+        // Render overview cards
+        overview.innerHTML = d.clusters.map(cl => `
+            <div onclick="showCluster('${esc(cl.role)}')" style="cursor:pointer;background:rgba(124,106,247,0.08);border:1px solid rgba(124,106,247,0.2);
+                border-radius:12px;padding:18px 22px;min-width:160px;transition:all 0.15s;"
+                onmouseover="this.style.borderColor='rgba(124,106,247,0.5)'" onmouseout="this.style.borderColor='rgba(124,106,247,0.2)'">
+                <div style="font-size:1.5rem;font-weight:800;color:#a78bfa;">${cl.count}</div>
+                <div style="font-size:0.8rem;color:rgba(255,255,255,0.55);margin-top:4px;">${esc(cl.role)}</div>
+            </div>
+        `).join('');
+        clusterLoaded = true;
+    } catch { overview.innerHTML = '<p style="color:#fca5a5;">Error loading clusters.</p>'; }
+}
+
+async function showCluster(role) {
+    const overview = document.getElementById('cluster-overview');
+    const results  = document.getElementById('cluster-results');
+    const label    = document.getElementById('cluster-results-label');
+    const tbody    = document.getElementById('cluster-tbody');
+    overview.style.display = 'none';
+    results.style.display  = 'block';
+    label.textContent = `Loading ${role}…`;
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Loading…</td></tr>';
+    try {
+        const r = await fetch(`${API}/api/admin/cluster-candidates?admin_id=${adminId}&role=${encodeURIComponent(role)}`);
+        const d = await r.json();
+        label.textContent = `🎯 ${d.role} — ${d.count} candidate${d.count !== 1 ? 's' : ''}`;
+        if (!d.candidates || d.candidates.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No candidates matched for ${esc(role)}.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = d.candidates.map(c => `
+            <tr>
+                <td style="font-weight:600;color:#f1f5f9;">${esc(c.name)}</td>
+                <td style="color:#94a3b8;font-size:0.82rem;">${esc(c.email)}</td>
+                <td style="color:#a78bfa;font-size:0.8rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(c.skills)}">${esc(c.skills || '—')}</td>
+                <td style="color:#64748b;font-size:0.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(c.experience)}">${esc(c.experience || '—')}</td>
+                <td>${c.has_resume
+                    ? `<a class="btn-tbl-view" href="${API}/api/resume/download?user_id=${c._id}" target="_blank">📄 Resume</a>`
+                    : '<span style="color:#475569;font-size:0.78rem;">None</span>'
+                }</td>
+            </tr>
+        `).join('');
+    } catch { tbody.innerHTML = '<tr><td colspan="5" class="empty-state" style="color:#fca5a5;">Error loading candidates.</td></tr>'; }
+}
+
+document.getElementById('cluster-search-btn')?.addEventListener('click', () => {
+    const role = document.getElementById('cluster-role-select')?.value;
+    if (!role) {
+        document.getElementById('cluster-overview').style.display = 'flex';
+        document.getElementById('cluster-results').style.display = 'none';
+    } else {
+        showCluster(role);
+    }
+});
+
+document.getElementById('cluster-back-btn')?.addEventListener('click', () => {
+    document.getElementById('cluster-overview').style.display = 'flex';
+    document.getElementById('cluster-results').style.display = 'none';
+    document.getElementById('cluster-role-select').value = '';
+});
+
+// Allow clicking overview cards
+window.showCluster = showCluster;
 
 // ── Jobs ──────────────────────────────────────────────────────────────────
 let allJobs = [];
@@ -257,7 +363,8 @@ document.querySelectorAll('[data-panel]').forEach(btn => {
 });
 
 // ── Logout ────────────────────────────────────────────────────────────────
-document.getElementById('admin-logout-btn').addEventListener('click', () => {
+document.getElementById('admin-logout-btn').addEventListener('click', (e) => {
+    e.preventDefault();
     if (!confirm('Log out of admin panel?')) return;
     localStorage.clear();
     window.location.href = 'login.html';

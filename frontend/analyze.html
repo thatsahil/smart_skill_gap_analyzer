@@ -7,25 +7,147 @@
     <meta name="theme-color" content="#09090b">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
     <title>Analyze — Skill Gap Analyzer</title>
-    <meta name="description"
-        content="Upload your resume and a job description for an AI-powered semantic skill gap analysis.">
+    <meta name="description" content="Upload your resume and a job description for an AI-powered semantic skill gap analysis. View saved reports.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/analyze.css">
+    <style>
+        /* ── My Reports Section ─────────────────────────────────── */
+        .my-reports-section {
+            padding: 48px 0 64px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            margin-top: 12px;
+        }
+        .my-reports-section .section-hd {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .my-reports-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.02em;
+        }
+        .my-reports-section h2 span { color: #a78bfa; }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .report-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 22px;
+            transition: border-color 0.2s, transform 0.15s;
+            opacity: 0;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:none; }
+        }
+        .report-card:hover { border-color: rgba(124,106,247,0.3); }
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .report-date { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
+        .gap-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .gap-badge.high   { background: rgba(239,68,68,0.15);   color: #fca5a5; }
+        .gap-badge.medium { background: rgba(245,158,11,0.15);  color: #fcd34d; }
+        .gap-badge.low    { background: rgba(16,185,129,0.15);  color: #6ee7b7; }
+        .report-snippet {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.4);
+            font-style: italic;
+            margin: 8px 0 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .report-skills-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+        .report-skills-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .skill-tag {
+            background: rgba(124,106,247,0.12);
+            border: 1px solid rgba(124,106,247,0.25);
+            color: #a78bfa;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .skill-tag:hover { background: rgba(124,106,247,0.25); }
+        .skill-tag-more { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); cursor: default; }
+        .report-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding-top: 14px;
+            margin-top: 4px;
+        }
+        .report-card-footer a { color: #a78bfa; font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+        .delete-report-btn {
+            background: none;
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s;
+        }
+        .delete-report-btn:hover { background: rgba(239,68,68,0.12); }
+        .reports-empty {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 14px;
+        }
+        .reports-empty a { color: #a78bfa; }
+        #reports-loading { color: rgba(255,255,255,0.35); padding: 20px; text-align:center; font-size:0.9rem; }
+    </style>
 </head>
 
 <body>
     <header>
-                        <nav>
+        <nav>
             <div class="logo">Skill Gap Analyzer</div>
-            <div class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="analyze.html">Analyze</a>
-                <a href="skill-gap-reports.html">Roadmap</a>
-                <a href="profile.html">Profile</a>
+            <div class="nav-links" id="main-nav-links">
+                <a href="dashboard.html" id="nav-dashboard">Dashboard</a>
+                <a href="analyze.html" id="nav-analyze">Analyze</a>
+                <a href="skill-gap-reports.html" id="nav-roadmap">Roadmap</a>
+                <a href="profile.html" id="nav-profile">Profile</a>
                 <a href="#" id="logout-btn">Logout</a>
             </div>
         </nav>
@@ -40,14 +162,13 @@
                     AI-Powered · SBERT Semantic Analysis
                 </div>
                 <h1>Analyze Your Skill Gap</h1>
-                <p>Upload your resume and a job description. Our AI compares them semantically —> not just keywords —>
-                    and
-                    tells you exactly what to learn.</p>
+                <p>Upload your resume and a job description. Our AI compares them semantically —
+                    not just keywords — and tells you exactly what to learn.</p>
             </div>
         </section>
 
         <!-- ── Upload Panel ───────────────────────────────────────────────── -->
-        <section class="analyze-section">
+        <section class="analyze-section" id="analyze-section">
             <div class="container analyze-grid">
 
                 <!-- Left: Resume upload -->
@@ -64,10 +185,9 @@
                         <input type="file" id="resume-input" accept=".pdf" hidden>
                         <div class="drop-content" id="resume-drop-content">
                             <div class="drop-icon">☁️</div>
-                            <p>Drag & drop your PDF here</p>
+                            <p>Drag &amp; drop your PDF here</p>
                             <span>or</span>
-                            <button class="btn-outline" onclick="document.getElementById('resume-input').click()">Browse
-                                Files</button>
+                            <button class="btn-outline" onclick="document.getElementById('resume-input').click()">Browse Files</button>
                         </div>
                         <div class="file-selected hidden" id="resume-file-info">
                             <div class="file-icon">📋</div>
@@ -99,8 +219,7 @@
 
                     <!-- Tab: Text -->
                     <div class="jd-panel active" id="panel-text">
-                        <textarea id="jd-textarea" placeholder="Paste the full job description here…"
-                            rows="10"></textarea>
+                        <textarea id="jd-textarea" placeholder="Paste the full job description here…" rows="10"></textarea>
                         <div class="char-count"><span id="jd-char-count">0</span> characters</div>
                     </div>
 
@@ -110,9 +229,8 @@
                             <input type="file" id="jd-input" accept=".pdf" hidden>
                             <div class="drop-content" id="jd-drop-content">
                                 <div class="drop-icon">☁️</div>
-                                <p>Drag & drop JD PDF here</p>
-                                <button class="btn-outline"
-                                    onclick="document.getElementById('jd-input').click()">Browse</button>
+                                <p>Drag &amp; drop JD PDF here</p>
+                                <button class="btn-outline" onclick="document.getElementById('jd-input').click()">Browse</button>
                             </div>
                             <div class="file-selected hidden" id="jd-file-info">
                                 <div class="file-icon">📋</div>
@@ -168,7 +286,7 @@
                     </div>
                     <div class="results-header-actions">
                         <button class="btn-outline" id="export-btn" title="Export as PDF">⬇ Export PDF</button>
-                        <button class="btn-save" id="save-report-btn" title="Save this report to My Reports">💾 Save Report</button>
+                        <button class="btn-save" id="save-report-btn" title="Save this report">💾 Save Report</button>
                         <button class="btn-outline" id="new-analysis-btn">← New Analysis</button>
                     </div>
                 </div>
@@ -190,21 +308,33 @@
                     </div>
                 </div>
 
-                <!-- SBERT Semantic Mismatches Panel (populated by JS) -->
+                <!-- SBERT Semantic Mismatches Panel -->
                 <div class="sbert-panel hidden" id="sbert-panel"></div>
 
-                <!-- Comparison Radar Chart Container (populated by JS) -->
+                <!-- Comparison Radar Chart Container -->
                 <div id="comparison-chart-container" class="hidden"></div>
 
                 <h3 class="skills-grid-title" id="skills-grid-title">📚 Skills to Work On (with Learning Resources)</h3>
-                <div class="skills-grid" id="skills-grid">
-                    <!-- Skill cards rendered by JS -->
-                </div>
+                <div class="skills-grid" id="skills-grid"></div>
 
                 <div class="results-footer">
-                    <p>💡 Click on any skill above to generate a full learning roadmap on the <a
-                            href="skill-gap-reports.html">roadmap page</a>.</p>
+                    <p>💡 Click on any skill above to generate a full learning roadmap on the <a href="skill-gap-reports.html">roadmap page</a>.</p>
                 </div>
+            </div>
+        </section>
+
+        <!-- ── My Reports Section ─────────────────────────────────────────── -->
+        <section class="my-reports-section" id="my-reports-section">
+            <div class="container">
+                <div class="section-hd">
+                    <h2>📋 My <span>Saved Reports</span></h2>
+                    <button id="refresh-reports-btn" style="padding:8px 16px;border-radius:8px;background:rgba(124,106,247,0.12);border:1px solid rgba(124,106,247,0.3);color:#a78bfa;font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">↻ Refresh</button>
+                </div>
+                <div id="reports-loading">Loading your reports…</div>
+                <div class="reports-empty hidden" id="reports-empty">
+                    <p>No saved reports yet. Run an analysis above and click <strong>Save Report</strong>.</p>
+                </div>
+                <div class="reports-grid hidden" id="reports-grid"></div>
             </div>
         </section>
 
@@ -221,12 +351,10 @@
             <p>© 2026 Skill Gap Analyzer. All rights reserved.</p>
         </div>
     </footer>
-    <!-- External libraries -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/analyze.js"></script>
     <script src="js/chat-widget.js"></script>
 </body>
 
 </html>
-
-

@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Only inject on authenticated pages or if specifically allowed
-    // Here we inject it everywhere for convenience, but check if user is logged in
-    const userId = localStorage.getItem('user_id');
-    if (!userId) return; // Don't show chat on public landing/auth pages
+    const userId   = localStorage.getItem('user_id');
+    const userType = localStorage.getItem('user_type');
+    // Don't show chat on public landing/auth pages, or for company/admin users
+    if (!userId) return;
+    if (userType === 'company' || userType === 'admin') return;
+    if (window._suppressChatbot) return;
 
     injectChatUI();
 });

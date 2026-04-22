@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
-            if(!confirm('Are you sure you want to log out?')) return;
             e.preventDefault();
+            if(!confirm('Are you sure you want to log out?')) return;
             localStorage.clear();
             window.location.href = 'login.html';
         });

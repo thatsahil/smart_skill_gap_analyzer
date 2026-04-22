@@ -361,6 +361,9 @@
             <button class="sidebar-nav-item" id="nav-apps" data-panel="panel-apps">
                 <span class="icon">📄</span> Applications
             </button>
+            <button class="sidebar-nav-item" id="nav-cluster" data-panel="panel-cluster">
+                <span class="icon">🎯</span> Cluster Resumes
+            </button>
         </nav>
         <div class="sidebar-bottom">
             <button class="sidebar-nav-item" id="admin-logout-btn" style="color:#fca5a5;">
@@ -388,6 +391,9 @@
                 <div class="stat-card"><div class="stat-label">Jobs Posted</div><div class="stat-value" id="stat-jobs">—</div></div>
                 <div class="stat-card"><div class="stat-label">Applications</div><div class="stat-value" id="stat-apps">—</div></div>
                 <div class="stat-card"><div class="stat-label">Reports</div><div class="stat-value" id="stat-reports">—</div></div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center;">
+                <button id="seed-demo-btn" style="padding:10px 22px;border-radius:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.35);color:#a78bfa;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.15s;">🪄 Seed Demo Users &amp; Companies</button>
             </div>
             <p style="color:rgba(255,255,255,0.3);font-size:0.82rem;text-align:center;margin-top:16px;">
                 Use the sidebar to navigate and manage platform data.
@@ -469,6 +475,42 @@
                             <tr><td colspan="6" class="empty-state">Loading applications…</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Cluster Resumes Panel ── -->
+        <div class="admin-panel" id="panel-cluster">
+            <div class="admin-table-wrap">
+                <div class="admin-table-header" style="flex-wrap:wrap;gap:12px;">
+                    <h3>🎯 Candidate Clusters by Role</h3>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="cluster-role-select" class="admin-search" style="width:auto;min-width:220px;">
+                            <option value="">All Clusters (Overview)</option>
+                        </select>
+                        <button id="cluster-search-btn" style="padding:8px 16px;border-radius:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.35);color:#a78bfa;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">🔍 Show Candidates</button>
+                    </div>
+                </div>
+                <div id="cluster-overview" style="padding:20px;display:flex;flex-wrap:wrap;gap:12px;"></div>
+                <div id="cluster-results" style="display:none;">
+                    <div id="cluster-results-header" style="padding:16px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;justify-content:space-between;align-items:center;">
+                        <span id="cluster-results-label" style="color:#a78bfa;font-weight:700;font-size:0.95rem;"></span>
+                        <button id="cluster-back-btn" style="padding:6px 14px;border-radius:6px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#94a3b8;font-family:'Inter',sans-serif;font-size:0.82rem;cursor:pointer;">← Back to Overview</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="admin-tbl">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Skills</th>
+                                    <th>Experience</th>
+                                    <th>Resume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cluster-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
