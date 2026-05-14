@@ -263,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadJobApplicantsModal(jobId, jobTitle) {
         vaStepJobs.style.display = 'none';
         vaStepApps.style.display = 'block';
+        vaStepApps.dataset.jobId = jobId;   // store for ATS score button
         vaTitle.textContent = jobTitle;
         vaSub.textContent   = 'Applicants for this opening';
         vaAppsList.innerHTML = '<p style="color:#64748b;">Loading applicants…</p>';
@@ -286,12 +287,67 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${app.candidate_skills ? `<p style="color:#a78bfa;font-size:0.78rem;margin-top:4px;">Skills: ${escapeHtml(app.candidate_skills)}</p>` : ''}
                             <p style="color:#64748b;font-size:0.75rem;margin-top:6px;">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
                         </div>
-                        <div style="flex-shrink:0;">
+                        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
                             ${app.has_resume
                                 ? `<a href="http://127.0.0.1:5000/api/resume/download?user_id=${app.user_id}" target="_blank" style="padding:8px 14px;border-radius:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);color:#a78bfa;font-size:0.82rem;font-weight:600;text-decoration:none;white-space:nowrap;display:inline-block;">📄 View Resume</a>`
                                 : `<span style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);color:#64748b;font-size:0.82rem;">No Resume</span>`}
+                            ${app.has_resume
+                                ? `<button class="ats-score-btn" data-uid="${app.user_id}" style="padding:8px 14px;border-radius:8px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;">📊 ATS Score</button>`
+                                : ''}
                         </div>
-                    </div>`;
+                    </div>
+                    <div class="ats-result-area-${app.user_id}" style="margin-top:10px;"></div>`;
+
+                // ATS Score button handler
+                const atsBtn = card.querySelector('.ats-score-btn');
+                if (atsBtn) {
+                    atsBtn.addEventListener('click', async () => {
+                        atsBtn.textContent = 'Analyzing…';
+                        atsBtn.disabled = true;
+                        try {
+                            // Get current job_id from the active job step
+                            const currentJobId = card.closest('#va-step-apps')?.dataset.jobId || '';
+                            const res = await fetch('http://127.0.0.1:5000/api/ats-score', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({user_id: app.user_id, job_id: currentJobId})
+                            });
+                            const d = await res.json();
+                            if (res.ok) {
+                                const resultArea = card.querySelector(`.ats-result-area-${app.user_id}`);
+                                const atsColor = d.ats_score >= 70 ? '#34d399' : d.ats_score >= 50 ? '#f59e0b' : '#fca5a5';
+                                const atsLabel = d.ats_score >= 80 ? 'Excellent' : d.ats_score >= 65 ? 'Good' : d.ats_score >= 50 ? 'Average' : 'Needs Work';
+                                const matchHtml = d.match_pct !== null
+                                    ? `<span style="padding:3px 9px;border-radius:6px;background:rgba(99,102,241,0.15);color:#a78bfa;font-size:0.73rem;font-weight:700;">🎯 ${d.match_pct}% Job Fit</span>`
+                                    : '';
+                                resultArea.innerHTML = `
+                                    <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07);margin-top:4px;">
+                                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;">
+                                            <span style="font-size:0.78rem;color:#94a3b8;">ATS Score</span>
+                                            <span style="font-weight:800;font-size:1.05rem;color:${atsColor}">${d.ats_score}<span style="font-size:0.7rem;font-weight:500;color:#64748b;">/100</span></span>
+                                            <span style="font-size:0.72rem;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,0.05);color:${atsColor};font-weight:700;">${atsLabel}</span>
+                                            ${matchHtml}
+                                        </div>
+                                        <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+                                            <div style="height:100%;width:${d.ats_score}%;background:${atsColor};border-radius:3px;"></div>
+                                        </div>
+                                        <div style="margin-top:6px;font-size:0.68rem;color:#52525b;">Scored on: Skills · Sections · Contact · Certifications · Internships · Work Exp · Formatting</div>
+                                        ${d.skills && d.skills.length > 0 ? `<div style="margin-top:5px;font-size:0.7rem;color:#64748b;">Skills: ${d.skills.slice(0,6).join(', ')}${d.skills.length > 6 ? ' +'+(d.skills.length-6)+' more' : ''}</div>` : ''}
+                                    </div>`;
+                                atsBtn.textContent = '📊 Re-Analyze';
+                            } else {
+                                showToast(d.error || 'Could not compute ATS score.', 'error');
+                                atsBtn.textContent = '📊 ATS Score';
+                            }
+                        } catch {
+                            showToast('Server error computing ATS score.', 'error');
+                            atsBtn.textContent = '📊 ATS Score';
+                        } finally {
+                            atsBtn.disabled = false;
+                        }
+                    });
+                }
+
                 vaAppsList.appendChild(card);
             });
         } catch {
@@ -438,7 +494,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/jobs');
+            const endpoint = userType === 'company' 
+                ? `http://127.0.0.1:5000/api/jobs/company/${userId}`
+                : 'http://127.0.0.1:5000/api/jobs';
+            const response = await fetch(endpoint);
             allJobs = await response.json();
             if (response.ok) renderJobs(allJobs);
         } catch (error) {
@@ -481,8 +540,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="company">${escapeHtml(job.company_name)}</p>
                 ${deadlineMeta}${skillsMeta}
                 <p style="margin-top:8px;">${escapeHtml(job.description)}</p>
-                <div class="score-chip-area"></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
                     <button class="btn view-details-btn" data-id="${job._id}" style="width:auto;padding:7px 16px;font-size:0.82rem;">View Details</button>
                     ${isOwner ? `
                         <button class="btn edit-job-btn" data-id="${job._id}" style="width:auto;padding:7px 16px;font-size:0.82rem;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);color:#a78bfa;">✏️ Edit</button>
@@ -492,46 +550,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
 
-            // Candidate-specific actions (Check Fit + Apply)
+            // Candidate-specific actions (Apply only)
             if (isCandidate) {
                 const actionsRow = document.createElement('div');
                 actionsRow.className = 'job-card-actions';
-
-                const fitBtn = document.createElement('button');
-                fitBtn.className = 'btn-check-fit';
-                fitBtn.textContent = '⚡ Check Fit';
-                fitBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    fitBtn.textContent = 'Scoring…';
-                    fitBtn.disabled = true;
-                    const fd = new FormData();
-                    fd.append('user_id', userId);
-                    fd.append('job_id', job._id);
-                    try {
-                        const r = await fetch('http://127.0.0.1:5000/api/match-score', { method: 'POST', body: fd });
-                        const d = await r.json();
-                        if (r.ok) {
-                            const chipArea = jobCard.querySelector('.score-chip-area');
-                            const cls = d.score >= 70 ? 'great' : d.score >= 50 ? 'good' : d.score >= 35 ? 'partial' : 'low';
-                            chipArea.innerHTML = `<span class="score-chip ${cls}">🎯 ${d.score}% — ${d.label}</span>`;
-                            fitBtn.textContent = '⚡ Re-check';
-                        } else {
-                            showToast(d.error || 'Could not compute score. Upload a resume to your profile first.', 'error');
-                            fitBtn.textContent = '⚡ Check Fit';
-                        }
-                    } catch {
-                        showToast('Server error while computing match score.', 'error');
-                        fitBtn.textContent = '⚡ Check Fit';
-                    } finally {
-                        fitBtn.disabled = false;
-                    }
-                });
 
                 const applyBtn = document.createElement('button');
                 applyBtn.dataset.jobId = job._id;
 
                 if (job.is_expired) {
-                    // Deadline passed — block application
                     applyBtn.className = 'btn-apply applied';
                     applyBtn.textContent = '🔒 Closed';
                     applyBtn.disabled = true;
@@ -574,9 +601,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
 
-                actionsRow.appendChild(fitBtn);
                 actionsRow.appendChild(applyBtn);
-                jobCard.insertBefore(actionsRow, jobCard.querySelector('.score-chip-area'));
+                jobCard.appendChild(actionsRow);
             }
 
             // Owner-specific: applicant count chip

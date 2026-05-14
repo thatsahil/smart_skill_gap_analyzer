@@ -114,13 +114,18 @@ def save_progress():
     skill = data.get('skill')
     level = data.get('level')
     progress_data = data.get('progress')
+    steps = data.get('steps')
 
     if not user_id or not skill or not level:
         return jsonify({"message": "User ID, skill, and level are required"}), 400
 
+    update_fields = {f"progress.{skill}.{level}": progress_data}
+    if steps:
+        update_fields[f"roadmaps.{skill}.{level}"] = steps
+
     users_collection.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {f"progress.{skill}.{level}": progress_data}},
+        {"$set": update_fields},
         upsert=True
     )
     return jsonify({"message": "Progress saved successfully!"}), 200
@@ -139,4 +144,43 @@ def load_progress():
         return jsonify({"message": "User not found"}), 404
 
     progress_data = user.get('progress', {}).get(skill, {}).get(level, {})
-    return jsonify(progress_data), 200
+    steps = user.get('roadmaps', {}).get(skill, {}).get(level, None)
+    return jsonify({"progress": progress_data, "steps": steps}), 200
+
+
+@auth_bp.route('/api/my-roadmaps', methods=['GET'])
+def list_my_roadmaps():
+    """Return a flat list of all roadmaps saved for this user."""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'user_id is required'}), 400
+
+    try:
+        user = users_collection.find_one({'_id': ObjectId(user_id)})
+    except Exception:
+        return jsonify({'message': 'Invalid user_id'}), 400
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    roadmaps = user.get('roadmaps', {})
+    progress  = user.get('progress', {})
+
+    result = []
+    for skill, levels in roadmaps.items():
+        for level, steps in levels.items():
+            if not isinstance(steps, list) or len(steps) == 0:
+                continue
+            prog = progress.get(skill, {}).get(level, {})
+            done = sum(1 for s in steps if prog.get(s.get('title', '')) == 'done')
+            result.append({
+                'skill':    skill,
+                'level':    level,
+                'total':    len(steps),
+                'done':     done,
+                'pct':      round((done / len(steps)) * 100) if steps else 0,
+                'steps':    steps,
+                'progress': prog,
+            })
+
+    result.sort(key=lambda x: x['done'], reverse=True)
+    return jsonify(result), 200

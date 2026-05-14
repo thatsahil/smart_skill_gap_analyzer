@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#09090b">
-    <meta name="description" content="Manage your profile, update your information, and upload your stored resume.">
+    <meta name="description" content="Manage your professional profile, experience, and certifications.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>">
     <title>Profile — Skill Gap Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,10 +12,269 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        /* ── Profile Page Layout ─────────────────── */
+        .profile-hero {
+            padding: 36px 0 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .profile-hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text-1);
+            margin-bottom: 4px;
+        }
+        .profile-hero p { font-size: 0.85rem; color: var(--text-2); }
+
+        .profile-body {
+            padding: 32px 0 60px;
+        }
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* ── Sidebar ─────────────────────────────── */
+        .profile-sidebar {
+            position: sticky;
+            top: 76px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s, color 0.15s;
+            width: 100%;
+        }
+        .sidebar-nav-btn:hover { background: rgba(255,255,255,0.04); color: var(--text-1); }
+        .sidebar-nav-btn.active { background: var(--accent-dim); color: var(--accent-light); font-weight: 600; }
+        .sidebar-nav-btn .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+        /* ── Card / Section ──────────────────────── */
+        .profile-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .profile-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .profile-card-header h2 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-1);
+            letter-spacing: -0.01em;
+        }
+        .profile-card-header .card-icon {
+            font-size: 1rem;
+            width: 32px; height: 32px;
+            background: var(--accent-dim);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ── Compact 2-col form grid ─────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 18px;
+        }
+        .form-grid .span-2 { grid-column: 1 / -1; }
+
+        .fg {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .fg label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .fg input,
+        .fg select,
+        .fg textarea {
+            width: 100%;
+            padding: 8px 11px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border-md);
+            border-radius: 7px;
+            color: var(--text-1);
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            line-height: 1.4;
+        }
+        .fg input::placeholder,
+        .fg textarea::placeholder { color: var(--text-3); }
+        .fg input:focus,
+        .fg select:focus,
+        .fg textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        .fg input[readonly] { opacity: 0.45; cursor: not-allowed; }
+        .fg textarea { resize: vertical; min-height: 80px; }
+        .fg select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2352525b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+            cursor: pointer;
+        }
+        .fg select option { background: var(--bg-raised); }
+
+        /* ── Repeatable entry list (certs/exp/intern) */
+        .entry-list { display: flex; flex-direction: column; gap: 10px; }
+        .entry-item {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 14px;
+        }
+        .entry-item .span-2 { grid-column: 1 / -1; }
+        .entry-remove {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .entry-remove:hover { color: #fca5a5; background: var(--red-dim); }
+
+        .add-entry-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 7px 14px;
+            background: transparent;
+            border: 1px dashed var(--border-md);
+            border-radius: 7px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+        .add-entry-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+            background: var(--accent-dim);
+        }
+
+        /* ── Resume card ─────────────────────────── */
+        .resume-drop-mini {
+            border: 1.5px dashed var(--border-md);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .resume-drop-mini:hover, .resume-drop-mini.drag-over {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .resume-drop-mini p { font-size: 0.82rem; color: var(--text-2); margin: 6px 0; }
+
+        /* ── Save button ─────────────────────────── */
+        .save-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 18px;
+            padding: 9px 22px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+        }
+        .save-btn:hover { background: #6d5ce6; box-shadow: var(--shadow-accent); transform: translateY(-1px); }
+        .save-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        /* ── Danger zone ─────────────────────────── */
+        .danger-card {
+            border-color: rgba(239,68,68,0.2);
+            background: rgba(239,68,68,0.03);
+        }
+        .danger-card .profile-card-header { border-color: rgba(239,68,68,0.15); }
+        .danger-card h2 { color: #fca5a5; }
+        .btn-danger {
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid rgba(239,68,68,0.4);
+            border-radius: 7px;
+            color: #fca5a5;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-top: 10px;
+        }
+        .btn-danger:hover { background: var(--red-dim); }
+
+        /* ── Section visibility ──────────────────── */
+        .profile-section-panel { display: none; }
+        .profile-section-panel.active { display: block; }
+
+        @media (max-width: 768px) {
+            .profile-layout { grid-template-columns: 1fr; }
+            .profile-sidebar { position: static; flex-direction: row; flex-wrap: wrap; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .span-2 { grid-column: 1; }
+            .entry-item { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
     <header>
-                    <nav>
+        <nav>
             <div class="logo">Skill Gap Analyzer</div>
             <div class="nav-links" id="main-nav-links">
                 <a href="dashboard.html" id="nav-dashboard">Dashboard</a>
@@ -28,106 +287,300 @@
     </header>
 
     <main>
-        <section id="profile-section" class="hero">
+        <section class="profile-hero">
             <div class="container">
                 <h1>Your Profile</h1>
-                <p>Keep your information up to date to get the best experience.</p>
+                <p>Keep your professional information current to maximize your job match accuracy.</p>
+            </div>
+        </section>
 
-                <!-- Candidate Profile Form -->
-                <div id="candidate-profile" style="display: none;" class="profile-panel">
+        <section class="profile-body">
+            <div class="container">
 
-                    <!-- Resume Upload Section -->
-                    <div class="resume-section">
-                        <h3 class="section-label">Stored Resume</h3>
-                        <div id="resume-stored-state" class="hidden">
-                            <div class="resume-stored-card">
-                                <span class="resume-file-icon">📄</span>
-                                <div class="resume-file-meta">
-                                    <p id="stored-resume-name">resume.pdf</p>
-                                    <span id="stored-resume-date" class="resume-sub"></span>
-                                </div>
-                                <div class="resume-actions">
-                                    <a id="download-resume-btn" href="#" class="btn-link">⬇ Download</a>
-                                    <button id="replace-resume-btn" class="btn-link">↺ Replace</button>
+                <!-- ── Candidate Profile ── -->
+                <div id="candidate-profile" style="display:none;">
+                    <div class="profile-layout">
+
+                        <!-- Sidebar nav -->
+                        <aside class="profile-sidebar">
+                            <button class="sidebar-nav-btn active" data-section="basics" id="btn-basics">
+                                <span class="nav-icon">👤</span> Basic Info
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="resume" id="btn-resume">
+                                <span class="nav-icon">📄</span> Resume
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="experience" id="btn-experience">
+                                <span class="nav-icon">💼</span> Work Experience
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="internships" id="btn-internships">
+                                <span class="nav-icon">🏢</span> Internships
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="certifications" id="btn-certifications">
+                                <span class="nav-icon">🏆</span> Certifications
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="intro" id="btn-intro">
+                                <span class="nav-icon">🗣️</span> Self Intro
+                            </button>
+                            <button class="sidebar-nav-btn" data-section="danger" id="btn-danger">
+                                <span class="nav-icon">⚠️</span> Account
+                            </button>
+                        </aside>
+
+                        <!-- Main content area -->
+                        <div class="profile-main">
+
+                            <!-- ── BASICS ── -->
+                            <div class="profile-section-panel active" id="section-basics">
+                                <form id="candidate-profile-form">
+
+                                    <div class="profile-card">
+                                        <div class="profile-card-header">
+                                            <div class="card-icon">👤</div>
+                                            <h2>Personal Information</h2>
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="fg">
+                                                <label for="cand-name">Full Name</label>
+                                                <input type="text" id="cand-name" name="name" placeholder="Jane Doe" required>
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-email">Email</label>
+                                                <input type="email" id="cand-email" name="email" readonly>
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-phone">Phone Number</label>
+                                                <input type="tel" id="cand-phone" name="phone" placeholder="+91 9876543210">
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-location">Location</label>
+                                                <input type="text" id="cand-location" name="location" placeholder="City, Country">
+                                            </div>
+                                            <div class="fg span-2">
+                                                <label for="cand-headline">Professional Headline</label>
+                                                <input type="text" id="cand-headline" name="headline" placeholder="e.g. Full Stack Developer | Open to Work">
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-linkedin">LinkedIn URL</label>
+                                                <input type="url" id="cand-linkedin" name="linkedin" placeholder="https://linkedin.com/in/username">
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-github">GitHub URL</label>
+                                                <input type="url" id="cand-github" name="github" placeholder="https://github.com/username">
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-portfolio">Portfolio / Website</label>
+                                                <input type="url" id="cand-portfolio" name="portfolio" placeholder="https://yoursite.com">
+                                            </div>
+                                            <div class="fg">
+                                                <label for="cand-education">Highest Education</label>
+                                                <select id="cand-education" name="education">
+                                                    <option value="">Select…</option>
+                                                    <option>High School / 12th</option>
+                                                    <option>Diploma</option>
+                                                    <option>Bachelor's Degree</option>
+                                                    <option>Master's Degree</option>
+                                                    <option>PhD / Doctorate</option>
+                                                    <option>Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="fg span-2">
+                                                <label for="cand-skills">Technical Skills <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)">(comma separated)</span></label>
+                                                <input type="text" id="cand-skills" name="skills" placeholder="Python, React, SQL, Machine Learning…">
+                                            </div>
+                                            <div class="fg span-2">
+                                                <label for="cand-bio">Professional Summary</label>
+                                                <textarea id="cand-bio" name="bio" rows="3" placeholder="A brief summary of your professional background and goals…"></textarea>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="save-btn">💾 Save Profile</button>
+                                    </div>
+
+                                </form>
+                            </div>
+
+                            <!-- ── RESUME ── -->
+                            <div class="profile-section-panel" id="section-resume">
+                                <div class="profile-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon">📄</div>
+                                        <h2>Stored Resume</h2>
+                                    </div>
+                                    <!-- Stored state -->
+                                    <div id="resume-stored-state" class="hidden">
+                                        <div class="resume-stored-card">
+                                            <span class="resume-file-icon">📄</span>
+                                            <div class="resume-file-meta">
+                                                <p id="stored-resume-name">resume.pdf</p>
+                                                <span id="stored-resume-date" class="resume-sub"></span>
+                                            </div>
+                                            <div class="resume-actions">
+                                                <a id="download-resume-btn" href="#" class="btn-link">⬇ Download</a>
+                                                <button id="replace-resume-btn" class="btn-link">↺ Replace</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Upload state -->
+                                    <div id="resume-upload-state">
+                                        <div class="resume-drop-mini" id="profile-resume-drop">
+                                            <input type="file" id="profile-resume-input" accept=".pdf" hidden>
+                                            <div id="profile-drop-content">
+                                                <div style="font-size:1.8rem;margin-bottom:6px;">☁️</div>
+                                                <p>Drag & drop your resume PDF here</p>
+                                                <button type="button" class="btn-outline" style="margin-top:8px;" onclick="document.getElementById('profile-resume-input').click()">Browse Files</button>
+                                            </div>
+                                            <div class="hidden" id="profile-file-selected">
+                                                <span>📋</span>
+                                                <p id="profile-file-name" style="font-weight:600;margin:6px 0;"></p>
+                                                <button class="save-btn" id="upload-resume-btn" style="margin-top:8px;">Upload Resume</button>
+                                            </div>
+                                        </div>
+                                        <p class="resume-hint">Once uploaded, your resume auto-fills on the Analyze page.</p>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- ── WORK EXPERIENCE ── -->
+                            <div class="profile-section-panel" id="section-experience">
+                                <div class="profile-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon">💼</div>
+                                        <h2>Work Experience</h2>
+                                    </div>
+                                    <div class="entry-list" id="experience-list"></div>
+                                    <button class="add-entry-btn" id="add-experience-btn">＋ Add Position</button>
+                                    <br>
+                                    <button class="save-btn" id="save-experience-btn">💾 Save Experience</button>
+                                </div>
+                            </div>
+
+                            <!-- ── INTERNSHIPS ── -->
+                            <div class="profile-section-panel" id="section-internships">
+                                <div class="profile-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon">🏢</div>
+                                        <h2>Internships</h2>
+                                    </div>
+                                    <div class="entry-list" id="internships-list"></div>
+                                    <button class="add-entry-btn" id="add-internship-btn">＋ Add Internship</button>
+                                    <br>
+                                    <button class="save-btn" id="save-internships-btn">💾 Save Internships</button>
+                                </div>
+                            </div>
+
+                            <!-- ── CERTIFICATIONS ── -->
+                            <div class="profile-section-panel" id="section-certifications">
+                                <div class="profile-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon">🏆</div>
+                                        <h2>Certifications</h2>
+                                    </div>
+                                    <div class="entry-list" id="certifications-list"></div>
+                                    <button class="add-entry-btn" id="add-certification-btn">＋ Add Certification</button>
+                                    <br>
+                                    <button class="save-btn" id="save-certifications-btn">💾 Save Certifications</button>
+                                </div>
+                            </div>
+
+                            <!-- ── SELF INTRO ── -->
+                            <div class="profile-section-panel" id="section-intro">
+                                <div class="profile-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon">🗣️</div>
+                                        <h2>Personalized Self-Intro</h2>
+                                    </div>
+                                    <p style="font-size:0.85rem;color:var(--text-2);margin-bottom:16px;">Generate a professional self-introduction script and voice modulation guide based on your current profile data. Make sure you've filled out your basic info, experience, internships, and skills before generating.</p>
+                                    
+                                    <button class="save-btn" id="generate-intro-btn">✨ Generate Intro</button>
+                                    
+                                    <div id="intro-result-container" style="display:none;margin-top:20px;">
+                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;margin-bottom:16px;">
+                                            <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-1);margin-bottom:8px;">Your Script</h3>
+                                            <p id="intro-script-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;"></p>
+                                        </div>
+                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;">
+                                            <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-1);margin-bottom:8px;">Speaking & Voice Modulation Advice</h3>
+                                            <p id="intro-advice-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── ACCOUNT / DANGER ── -->
+                            <div class="profile-section-panel" id="section-danger">
+                                <div class="profile-card danger-card">
+                                    <div class="profile-card-header">
+                                        <div class="card-icon" style="background:var(--red-dim);">⚠️</div>
+                                        <h2>Danger Zone</h2>
+                                    </div>
+                                    <p style="font-size:0.85rem;color:var(--text-2);">Once you delete your account, there is no going back. All your data, reports, and applications will be permanently removed.</p>
+                                    <button id="delete-account-btn" class="btn-danger">Delete My Account</button>
+                                </div>
+                            </div>
+
+                        </div><!-- /profile-main -->
+                    </div><!-- /profile-layout -->
+                </div><!-- /candidate-profile -->
+
+                <!-- ── Company Profile ── -->
+                <div id="company-profile" style="display:none;">
+                    <div style="max-width:640px;margin:0 auto;">
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <div class="card-icon">🏢</div>
+                                <h2>Company Information</h2>
+                            </div>
+                            <form id="company-profile-form">
+                                <div class="form-grid">
+                                    <div class="fg">
+                                        <label for="comp-name">Company Name</label>
+                                        <input type="text" id="comp-name" name="name" required placeholder="Acme Corp">
+                                    </div>
+                                    <div class="fg">
+                                        <label for="comp-email">Company Email</label>
+                                        <input type="email" id="comp-email" name="email" readonly>
+                                    </div>
+                                    <div class="fg">
+                                        <label for="comp-website">Website</label>
+                                        <input type="url" id="comp-website" name="website" placeholder="https://example.com">
+                                    </div>
+                                    <div class="fg">
+                                        <label for="comp-industry">Industry</label>
+                                        <input type="text" id="comp-industry" name="industry" placeholder="e.g. FinTech, Healthcare">
+                                    </div>
+                                    <div class="fg">
+                                        <label for="comp-size">Company Size</label>
+                                        <select id="comp-size" name="size">
+                                            <option value="">Select…</option>
+                                            <option>1–10 employees</option>
+                                            <option>11–50 employees</option>
+                                            <option>51–200 employees</option>
+                                            <option>201–1000 employees</option>
+                                            <option>1000+ employees</option>
+                                        </select>
+                                    </div>
+                                    <div class="fg">
+                                        <label for="comp-location">Headquarters</label>
+                                        <input type="text" id="comp-location" name="location" placeholder="City, Country">
+                                    </div>
+                                    <div class="fg span-2">
+                                        <label for="comp-description">Company Description</label>
+                                        <textarea id="comp-description" name="description" rows="3" placeholder="Brief description of what your company does…"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="save-btn">💾 Save Profile</button>
+                            </form>
                         </div>
-                        <div id="resume-upload-state">
-                            <div class="resume-dropzone" id="profile-resume-drop">
-                                <input type="file" id="profile-resume-input" accept=".pdf" hidden>
-                                <div class="resume-drop-content" id="profile-drop-content">
-                                    <div style="font-size:2rem;margin-bottom:8px;">☁️</div>
-                                    <p>Drag & drop your resume PDF here</p>
-                                    <button type="button" class="btn-outline" onclick="document.getElementById('profile-resume-input').click()">Browse Files</button>
-                                </div>
-                                <div class="hidden" id="profile-file-selected">
-                                    <span>📋</span>
-                                    <p id="profile-file-name"></p>
-                                    <button class="btn" id="upload-resume-btn" style="width:auto;padding:8px 18px;">Upload</button>
-                                </div>
+                        <div class="profile-card danger-card" style="margin-top:16px;">
+                            <div class="profile-card-header">
+                                <div class="card-icon" style="background:var(--red-dim);">⚠️</div>
+                                <h2>Danger Zone</h2>
                             </div>
-                            <p class="resume-hint">Once uploaded, your resume will auto-fill on the Analyze page.</p>
+                            <p style="font-size:0.85rem;color:var(--text-2);">Permanently delete your company account and all job postings.</p>
+                            <button id="delete-account-btn" class="btn-danger">Delete My Account</button>
                         </div>
                     </div>
-
-                    <form id="candidate-profile-form">
-                        <div class="form-group">
-                            <label for="cand-name">Full Name:</label>
-                            <input type="text" id="cand-name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cand-email">Email:</label>
-                            <input type="email" id="cand-email" name="email" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="cand-skills">Skills (comma separated):</label>
-                            <input type="text" id="cand-skills" name="skills" placeholder="e.g. Python, JavaScript, Machine Learning">
-                        </div>
-                        <div class="form-group">
-                            <label for="cand-experience">Experience Summary:</label>
-                            <textarea id="cand-experience" name="experience" rows="4"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="cand-education">Education:</label>
-                            <input type="text" id="cand-education" name="education">
-                        </div>
-                        <button type="submit" class="btn">Update Profile</button>
-                    </form>
                 </div>
 
-                <!-- Company Profile Form -->
-                <div id="company-profile" style="display: none;" class="profile-panel">
-                    <form id="company-profile-form">
-                        <div class="form-group">
-                            <label for="comp-name">Company Name:</label>
-                            <input type="text" id="comp-name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="comp-email">Company Email:</label>
-                            <input type="email" id="comp-email" name="email" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="comp-website">Website:</label>
-                            <input type="url" id="comp-website" name="website" placeholder="https://example.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="comp-industry">Industry:</label>
-                            <input type="text" id="comp-industry" name="industry">
-                        </div>
-                        <div class="form-group">
-                            <label for="comp-description">Company Description:</label>
-                            <textarea id="comp-description" name="description" rows="4"></textarea>
-                        </div>
-                        <button type="submit" class="btn">Update Profile</button>
-                    </form>
-                </div>
-
-                <!-- Danger Zone -->
-                <div class="danger-zone">
-                    <h3>Danger Zone</h3>
-                    <p>Once you delete your account, there is no going back. Please be certain.</p>
-                    <button id="delete-account-btn" class="btn btn-danger">Delete My Account</button>
-                </div>
             </div>
         </section>
     </main>
@@ -139,10 +592,6 @@
     </footer>
 
     <script src="js/profile.js"></script>
-
     <script src="js/chat-widget.js"></script>
 </body>
 </html>
-
-
-

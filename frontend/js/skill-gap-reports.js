@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
     document.getElementById('reset-btn').addEventListener('click', handleReset);
     document.getElementById('toast-close').addEventListener('click', hideToast);
+    document.getElementById('refresh-roadmaps-btn')?.addEventListener('click', loadSavedRoadmaps);
+    document.getElementById('save-roadmap-btn')?.addEventListener('click', handleSaveRoadmap);
 
     // Active nav highlighting
     const current = window.location.pathname.split('/').pop() || '';
@@ -37,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (skillInput) skillInput.value = prefill;
         sessionStorage.removeItem('roadmap_prefill');
     }
+
+    // Load saved roadmaps
+    loadSavedRoadmaps();
 });
 
 // ── Form submission ──────────────────────────────────────
@@ -51,9 +56,31 @@ async function handleFormSubmit(e) {
     currentSkill = skillInput;
     currentLevel = levelSelect;
     progressMap = {};
+    roadmapSteps = [];
 
     // Load saved progress from localStorage
     loadProgressFromStorage();
+    
+    let loadedFromBackend = false;
+    const userId = localStorage.getItem('user_id');
+    
+    if (roadmapSteps.length === 0 && userId) {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/load-progress?user_id=${userId}&skill=${currentSkill}&level=${currentLevel}`);
+            const data = await res.json();
+            if (data.steps && data.steps.length > 0) {
+                roadmapSteps = data.steps;
+                if (data.progress) progressMap = data.progress;
+                loadedFromBackend = true;
+                saveProgressToStorage();
+            }
+        } catch (e) {}
+    }
+
+    if (roadmapSteps.length > 0) {
+        renderRoadmap();
+        return;
+    }
 
     showLoading(true);
     setButtonDisabled(true);
@@ -61,6 +88,8 @@ async function handleFormSubmit(e) {
     try {
         const steps = await fetchRoadmapFromBackend(currentSkill, currentLevel);
         roadmapSteps = steps;
+        saveProgressToStorage();
+        if (userId) saveProgressToBackend();
         renderRoadmap();
     } catch (err) {
         showToast(err.message || 'Failed to generate roadmap. Is the backend running?');
@@ -186,6 +215,58 @@ function updateProgressUI() {
     document.getElementById('progress-ring-fill').style.strokeDashoffset = offset;
 }
 
+// ── Explicit Save Roadmap button ─────────────────────
+async function handleSaveRoadmap() {
+    if (!roadmapSteps.length) {
+        showToast('Generate a roadmap first before saving.');
+        return;
+    }
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+        showToast('You must be logged in to save roadmaps.');
+        return;
+    }
+
+    const btn = document.getElementById('save-roadmap-btn');
+    const original = btn.textContent;
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/save-progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id:  userId,
+                skill:    currentSkill,
+                level:    currentLevel,
+                progress: progressMap,
+                steps:    roadmapSteps
+            })
+        });
+        if (res.ok) {
+            btn.textContent = '✅ Saved!';
+            btn.style.opacity = '1';
+            // Refresh the saved roadmaps panel so the new one appears
+            await loadSavedRoadmaps();
+            // Scroll up to show the saved list
+            document.getElementById('saved-roadmaps-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.disabled = false;
+            }, 2500);
+        } else {
+            throw new Error('Server error');
+        }
+    } catch (_) {
+        showToast('Could not save roadmap. Make sure you are logged in and the server is running.');
+        btn.textContent = original;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+}
+
 // ── Reset all progress ────────────────────────────────────
 function handleReset() {
     if (!roadmapSteps.length) return;
@@ -201,12 +282,29 @@ function storageKey() {
 }
 
 function saveProgressToStorage() {
-    localStorage.setItem(storageKey(), JSON.stringify(progressMap));
+    localStorage.setItem(storageKey(), JSON.stringify({ progressMap, roadmapSteps }));
 }
 
 function loadProgressFromStorage() {
     const saved = localStorage.getItem(storageKey());
-    progressMap = saved ? JSON.parse(saved) : {};
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            if (parsed.progressMap) {
+                progressMap = parsed.progressMap;
+                roadmapSteps = parsed.roadmapSteps || [];
+            } else {
+                progressMap = parsed; // backwards compatibility
+                roadmapSteps = [];
+            }
+        } catch(e) {
+            progressMap = {};
+            roadmapSteps = [];
+        }
+    } else {
+        progressMap = {};
+        roadmapSteps = [];
+    }
 }
 
 // ── Backend progress persistence (optional, when logged in) ─
@@ -221,7 +319,8 @@ async function saveProgressToBackend() {
                 user_id: userId,
                 skill: currentSkill,
                 level: currentLevel,
-                progress: progressMap
+                progress: progressMap,
+                steps: roadmapSteps
             })
         });
     } catch (_) { /* silent — localStorage already saved */ }
@@ -288,6 +387,101 @@ function handleLogout(e) {
 
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ── Load & Render saved roadmaps ────────────────────────
+async function loadSavedRoadmaps() {
+    const userId = localStorage.getItem('user_id');
+    const listEl  = document.getElementById('saved-roadmaps-list');
+    const emptyEl = document.getElementById('saved-roadmaps-empty');
+    if (!listEl || !userId) return;
+
+    // Show skeleton
+    listEl.innerHTML = `<div style="grid-column:1/-1;color:#64748b;font-size:0.85rem;">Loading saved roadmaps…</div>`;
+
+    try {
+        const res  = await fetch(`${BACKEND_URL}/api/my-roadmaps?user_id=${userId}`);
+        const list = await res.json();
+
+        listEl.innerHTML = '';
+
+        if (!Array.isArray(list) || list.length === 0) {
+            listEl.appendChild(emptyEl);
+            emptyEl.style.display = 'block';
+            return;
+        }
+
+        emptyEl.style.display = 'none';
+
+        list.forEach((rm, idx) => {
+            const pct   = rm.pct || 0;
+            const color = pct >= 80 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#a78bfa';
+            const circ  = 2 * Math.PI * 18;  // r=18 small ring
+            const offset = circ - (pct / 100) * circ;
+            const card  = document.createElement('div');
+            card.style.cssText = `
+                background:rgba(255,255,255,0.04);
+                border:1px solid rgba(255,255,255,0.1);
+                border-radius:14px;
+                padding:18px 20px;
+                display:flex;
+                flex-direction:column;
+                gap:10px;
+                animation:slideInSaved 0.3s ease ${idx*60}ms both;
+            `;
+            card.innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <svg width="44" height="44" viewBox="0 0 44 44" style="flex-shrink:0;">
+                        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+                        <circle cx="22" cy="22" r="18" fill="none" stroke="${color}" stroke-width="3"
+                            stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+                            transform="rotate(-90 22 22)" style="transition:stroke-dashoffset 0.8s ease;"/>
+                        <text x="22" y="27" text-anchor="middle" font-size="9" fill="${color}" font-family="Inter,sans-serif" font-weight="700">${pct}%</text>
+                    </svg>
+                    <div style="flex:1;min-width:0;">
+                        <p style="color:#f1f5f9;font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(capitalize(rm.skill))}</p>
+                        <p style="color:#94a3b8;font-size:0.78rem;margin-top:2px;text-transform:capitalize;">${escapeHtml(rm.level)} level &middot; ${rm.done}/${rm.total} steps</p>
+                    </div>
+                </div>
+                <button class="resume-roadmap-btn" style="
+                    width:100%;padding:8px 0;border-radius:9px;
+                    background:linear-gradient(135deg,rgba(124,106,247,0.2),rgba(99,102,241,0.15));
+                    border:1px solid rgba(124,106,247,0.35);color:#a78bfa;
+                    font-family:Inter,sans-serif;font-size:0.85rem;font-weight:600;
+                    cursor:pointer;transition:background 0.15s;
+                ">▶ Resume Roadmap</button>
+            `;
+
+            const resumeBtn = card.querySelector('.resume-roadmap-btn');
+            resumeBtn.addEventListener('click', () => {
+                // Pre-fill form inputs
+                const skillInput  = document.getElementById('skill-input');
+                const levelSelect = document.getElementById('level-select');
+                if (skillInput)  skillInput.value  = rm.skill;
+                if (levelSelect) levelSelect.value = rm.level;
+
+                // Load the stored roadmap directly
+                currentSkill  = rm.skill;
+                currentLevel  = rm.level;
+                roadmapSteps  = rm.steps;
+                progressMap   = rm.progress || {};
+                renderRoadmap();
+            });
+
+            listEl.appendChild(card);
+        });
+
+        // Inject keyframes if not present
+        if (!document.getElementById('saved-slide-kf')) {
+            const s = document.createElement('style');
+            s.id = 'saved-slide-kf';
+            s.textContent = `@keyframes slideInSaved { from { opacity:0;transform:translateY(14px); } to { opacity:1;transform:none; } }`;
+            document.head.appendChild(s);
+        }
+
+    } catch (err) {
+        listEl.innerHTML = `<p style="color:#fca5a5;font-size:0.85rem;grid-column:1/-1;">Could not load saved roadmaps.</p>`;
+    }
 }
 
 function escapeHtml(str) {

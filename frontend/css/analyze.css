@@ -803,4 +803,68 @@
     .results-header { flex-direction: column; }
     .skills-grid { grid-template-columns: 1fr; }
     .match-score-callout { flex-direction: column; text-align: center; }
+    .learn-cols { grid-template-columns: 1fr; }
 }
+
+/* ─── Learn Columns (YouTube + Certificates) ─────────────────────────── */
+.learn-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.learn-col {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.learn-col-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+}
+
+.learn-col-icon { font-size: 0.85rem; }
+
+.learn-col-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.learn-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 0.76rem;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+
+.yt-link { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.12); }
+.yt-link:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.25); color: #fca5a5; }
+
+.cert-link { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.12); }
+.cert-link:hover { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.25); color: #fde68a; }
+
+.learn-link-icon { font-size: 0.7rem; flex-shrink: 0; margin-top: 1px; }
+
+.learn-empty { font-size: 0.72rem; color: var(--text-3); padding: 4px 0; }
+

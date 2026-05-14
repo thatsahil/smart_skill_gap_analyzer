@@ -37,45 +37,91 @@ def is_likely_resume(text):
 def compute_ats_score(resume_text, extracted_skills):
     """
     Compute a heuristic ATS score (0-100) based on actual resume content.
-    Factors: word count, skill count, section keywords, contact info.
+    Factors: word count (10), skills (20), sections (15), contact info (15),
+             certifications (10), internships (10), work experience (10),
+             standard template signals (10).
     """
     text = resume_text or ''
+    lower = text.lower()
     words = text.strip().split()
     word_count = len(words)
     skill_count = len(extracted_skills)
 
-    # Word count score (0-25): ideal range 300-700 words
+    # 1. Word count score (0-10): ideal 300-800 words
     if word_count >= 300:
-        length_score = min(25, int((word_count / 700) * 25))
+        length_score = min(10, int((word_count / 800) * 10))
     else:
-        length_score = int((word_count / 300) * 15)  # penalty for very short
+        length_score = int((word_count / 300) * 6)
 
-    # Skills score (0-35): 15+ skills = full marks
-    skill_score = min(35, int((skill_count / 15) * 35))
+    # 2. Skills score (0-20): 15+ skills = full marks
+    skill_score = min(20, int((skill_count / 15) * 20))
 
-    # Section headings score (0-25)
+    # 3. Section headings score (0-15)
     sections = [
         'experience', 'education', 'skills', 'projects', 'summary',
         'objective', 'certifications', 'achievements', 'work history',
-        'publications', 'awards', 'volunteering', 'languages'
+        'publications', 'awards', 'volunteering', 'languages', 'internship'
     ]
-    found_sections = sum(1 for s in sections if s in text.lower())
-    section_score = min(25, int((found_sections / 5) * 25))
+    found_sections = sum(1 for s in sections if s in lower)
+    section_score = min(15, int((found_sections / 5) * 15))
 
-    # Contact info score (0-15)
-    has_email = bool(re.search(r'[\w.+-]+@[\w-]+\.[a-z]{2,}', text, re.I))
-    has_phone = bool(re.search(r'(\+?\d[\d\s\-\(\)]{6,}\d)', text))
+    # 4. Contact info score (0-15)
+    has_email    = bool(re.search(r'[\w.+-]+@[\w-]+\.[a-z]{2,}', text, re.I))
+    has_phone    = bool(re.search(r'(\+?\d[\d\s\-\(\)]{6,}\d)', text))
     has_linkedin = bool(re.search(r'linkedin\.com', text, re.I))
-    has_github = bool(re.search(r'github\.com', text, re.I))
+    has_github   = bool(re.search(r'github\.com', text, re.I))
     contact_score = (5 if has_email else 0) + (5 if has_phone else 0) + \
                     (3 if has_linkedin else 0) + (2 if has_github else 0)
 
-    total = length_score + skill_score + section_score + contact_score
+    # 5. Certifications score (0-10)
+    cert_signals = [
+        'certified', 'certification', 'certificate', 'aws certified',
+        'google certified', 'microsoft certified', 'coursera', 'udemy',
+        'nptel', 'oracle certified', 'cisco certified', 'pmp', 'cpa',
+        'comptia', 'credential', 'badge'
+    ]
+    cert_hits = sum(1 for c in cert_signals if c in lower)
+    cert_score = min(10, cert_hits * 3)
+
+    # 6. Internship score (0-10)
+    intern_signals = ['internship', 'intern', 'trainee', 'industrial training', 'summer training']
+    intern_hits = sum(1 for s in intern_signals if s in lower)
+    intern_score = min(10, intern_hits * 5)
+
+    # 7. Work experience score (0-10): look for company names + durations
+    exp_signals = [
+        'present', 'current', 'full-time', 'part-time', 'contract',
+        'employed', 'worked at', 'working at', r'\d{4}\s*[-–]\s*\d{4}',
+        r'\d{4}\s*[-–]\s*present'
+    ]
+    exp_hits = 0
+    for sig in exp_signals:
+        if re.search(sig, lower):
+            exp_hits += 1
+    exp_score = min(10, exp_hits * 2)
+
+    # 8. Standard template / formatting signals (0-10)
+    #    Bullet points, action verbs, consistent date format
+    action_verbs = [
+        'developed', 'designed', 'implemented', 'managed', 'led', 'built',
+        'created', 'achieved', 'improved', 'delivered', 'collaborated',
+        'analyzed', 'optimized', 'maintained', 'coordinated'
+    ]
+    bullet_pattern = bool(re.search(r'^\s*[•●◦▪\-\*]', text, re.M))
+    date_pattern   = bool(re.search(r'(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s,]+\d{4}', lower))
+    verb_hits      = sum(1 for v in action_verbs if v in lower)
+    template_score = (3 if bullet_pattern else 0) + (3 if date_pattern else 0) + min(4, verb_hits // 2)
+
+    total = (length_score + skill_score + section_score + contact_score +
+             cert_score + intern_score + exp_score + template_score)
     return min(100, max(5, total))
 
 
 @analyze_bp.route('/api/analyze', methods=['POST'])
 def analyze_resume():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Gemini API key is not configured. Please provide a valid API key."}), 500
+
     user_id = request.form.get('user_id', '').strip()
     resume_file = request.files.get('resume')
 
@@ -153,9 +199,11 @@ Resume (first 2000 chars):
 
 Return ONLY a valid JSON array (no markdown, no code fences).
 Each object must have exactly these keys:
-- "skill"     : the skill name
-- "why_needed": one sentence (max 20 words) explaining why this skill matters
-- "resources" : array of exactly 2 objects each with {{"label": "short name", "url": "https://..."}}
+- "skill"            : the skill name
+- "why_needed"       : one sentence (max 20 words) explaining why this skill matters
+- "resources"        : array of exactly 2 objects each with {{"label": "short name", "url": "https://..."}}
+- "youtube_links"    : array of exactly 2 YouTube tutorial links, each with {{"label": "channel/video name", "url": "https://www.youtube.com/results?search_query=..."}}
+- "certificate_courses": array of exactly 2 certificate courses, each with {{"label": "course name + platform", "url": "https://www.coursera.org/search?query=..."}} (use coursera or udemy search URLs)
 Return only the raw JSON array."""
 
     headers = {'Content-Type': 'application/json'}
@@ -270,6 +318,9 @@ Return only the raw JSON object."""
 
 @analyze_bp.route('/api/generate-roadmap', methods=['POST'])
 def generate_roadmap():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Gemini API key is not configured. Please provide a valid API key."}), 500
+
     data = request.json
     skill = data.get('skill', '').strip()
     level = data.get('level', '').strip()
@@ -312,3 +363,53 @@ Return only the raw JSON array."""
         return jsonify({"error": f"Could not parse Gemini response: {e}"}), 500
     except Exception as e:
         return jsonify({"error": f"Roadmap generation failed: {e}"}), 500
+
+@analyze_bp.route('/api/generate-intro', methods=['POST'])
+def generate_intro():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Gemini API key is not configured. Please provide a valid API key."}), 500
+
+    data = request.json
+    if not data:
+        return jsonify({"error": "Profile data is required"}), 400
+
+    prompt = f"""You are an expert career coach and interview preparation specialist.
+The following is a candidate's profile information:
+Name: {data.get('name', 'N/A')}
+Headline: {data.get('headline', 'N/A')}
+Location: {data.get('location', 'N/A')}
+Education: {data.get('education', 'N/A')}
+Skills: {data.get('skills', 'N/A')}
+Bio: {data.get('bio', 'N/A')}
+Work Experience: {data.get('experience', 'N/A')}
+Internships: {data.get('internships', 'N/A')}
+Certifications: {data.get('certifications', 'N/A')}
+
+Based ONLY on the provided information, generate a highly professional and engaging self-introduction that the candidate can use in an interview when asked "Tell me about yourself".
+Also, provide detailed advice on how to speak this introduction in front of an HR/interviewer, including specific voice modulations (e.g., when to pause, which words to emphasize, what tone to use).
+
+Return ONLY a valid JSON object (no markdown, no code fences) with exactly these keys:
+- "intro_script": A string containing the personalized self-introduction script.
+- "speaking_advice": A string containing the advice on voice modulation and delivery.
+Return only the raw JSON object."""
+
+    headers = {'Content-Type': 'application/json'}
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+
+    try:
+        response = http_requests.post(GEMINI_URL, headers=headers, json=payload, timeout=60)
+        response.raise_for_status()
+
+        text = response.json()['candidates'][0]['content']['parts'][0]['text']
+        text = re.sub(r'^```(?:json)?\s*', '', text.strip())
+        text = re.sub(r'```\s*$', '', text.strip())
+
+        intro_data = json.loads(text.strip())
+        return jsonify({"success": True, "data": intro_data}), 200
+
+    except http_requests.exceptions.HTTPError as e:
+        return jsonify({"error": f"Gemini API error: {e}"}), 502
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Could not parse Gemini response: {e}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Intro generation failed: {e}"}), 500

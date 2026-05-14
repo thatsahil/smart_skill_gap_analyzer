@@ -10,6 +10,9 @@ GEMINI_URL     = f"https://generativelanguage.googleapis.com/v1beta/models/{MODE
 
 @chatbot_bp.route('/api/chat', methods=['POST'])
 def api_chat():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Gemini API key is not configured. Please provide a valid API key."}), 500
+
     data = request.json
     messages = data.get('messages', [])
     

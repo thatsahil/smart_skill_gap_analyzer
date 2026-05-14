@@ -421,11 +421,15 @@ function renderResults(data) {
     if (saveBtn) { saveBtn.textContent = '💾 Save Report'; saveBtn.disabled = false; }
 
     // ── Meta line
-    document.getElementById('results-meta').textContent =
-        `${skills.length} skill gaps identified · ` +
-        (sbert_used
-            ? `${gap_count} semantic mismatches detected via SBERT`
-            : 'AI-powered analysis (SBERT not available)');
+    let metaText = '';
+    if (!sbert_used) {
+        metaText = `${skills.length} skill gaps identified · AI-powered analysis (SBERT not available)`;
+    } else if (gap_count === 0) {
+        metaText = `✅ 100% semantic match — no skill gaps detected via SBERT`;
+    } else {
+        metaText = `${skills.length} skill gaps identified · ${gap_count} semantic mismatches detected via SBERT`;
+    }
+    document.getElementById('results-meta').textContent = metaText;
 
     // ── Match score callout (computed from SBERT gap similarities)
     renderMatchScore(sbert_gaps, sbert_used);
@@ -500,9 +504,23 @@ function renderResults(data) {
             `<a class="resource-link" href="${r.url}" target="_blank" rel="noopener">${r.label}</a>`
         ).join('');
 
+        const ytLinks = (item.youtube_links || []).map(r =>
+            `<a class="learn-link yt-link" href="${r.url}" target="_blank" rel="noopener">
+                <span class="learn-link-icon">▶</span>${escapeHtml(r.label)}
+             </a>`
+        ).join('');
+
+        const certLinks = (item.certificate_courses || []).map(r =>
+            `<a class="learn-link cert-link" href="${r.url}" target="_blank" rel="noopener">
+                <span class="learn-link-icon">🏆</span>${escapeHtml(r.label)}
+             </a>`
+        ).join('');
+
         const simBadge = (item.similarity !== null && item.similarity !== undefined)
             ? `<span class="skill-sim-badge">SBERT: ${Math.round(item.similarity * 100)}% match</span>`
             : '';
+
+        const hasLearnCols = ytLinks || certLinks;
 
         card.innerHTML = `
             <div class="skill-number">${i + 1}</div>
@@ -510,6 +528,23 @@ function renderResults(data) {
             <h3>${escapeHtml(item.skill)}</h3>
             <p class="skill-why">${escapeHtml(item.why_needed)}</p>
             <div class="skill-resources">${resources}</div>
+            ${hasLearnCols ? `
+            <div class="learn-cols">
+                <div class="learn-col">
+                    <div class="learn-col-header">
+                        <span class="learn-col-icon">📺</span>
+                        <span>YouTube Tutorials</span>
+                    </div>
+                    <div class="learn-col-links">${ytLinks || '<span class="learn-empty">No links available</span>'}</div>
+                </div>
+                <div class="learn-col">
+                    <div class="learn-col-header">
+                        <span class="learn-col-icon">🎓</span>
+                        <span>Certificate Courses</span>
+                    </div>
+                    <div class="learn-col-links">${certLinks || '<span class="learn-empty">No courses available</span>'}</div>
+                </div>
+            </div>` : ''}
             <p class="skill-roadmap-hint">Click to build a full roadmap →</p>
         `;
 
@@ -532,16 +567,26 @@ function renderMatchScore(sbert_gaps, sbert_used) {
     const callout = document.getElementById('match-score-callout');
     if (!callout) return;
 
-    if (!sbert_used || sbert_gaps.length === 0) {
+    // If SBERT is not available at all, hide
+    if (!sbert_used) {
         callout.classList.add('hidden');
         return;
     }
 
-    // Average similarity of detected gaps = coverage score
-    const avgSim  = sbert_gaps.reduce((s, g) => s + g.similarity, 0) / sbert_gaps.length;
-    const scorePct = Math.max(0, Math.min(100, Math.round(avgSim * 100)));
-    const label   = scorePct >= 70 ? 'Great Match' : scorePct >= 50 ? 'Good Match' : scorePct >= 35 ? 'Partial Match' : 'Low Match';
-    const color   = scorePct >= 70 ? '#10b981' : scorePct >= 50 ? '#f59e0b' : scorePct >= 35 ? '#f97316' : '#ef4444';
+    let scorePct, label, color;
+
+    if (sbert_gaps.length === 0) {
+        // Perfect — no semantic gaps detected
+        scorePct = 100;
+        label    = 'Perfect Match';
+        color    = '#10b981';
+    } else {
+        // Average similarity of detected gaps = coverage score
+        const avgSim = sbert_gaps.reduce((s, g) => s + g.similarity, 0) / sbert_gaps.length;
+        scorePct = Math.max(0, Math.min(100, Math.round(avgSim * 100)));
+        label    = scorePct >= 70 ? 'Great Match' : scorePct >= 50 ? 'Good Match' : scorePct >= 35 ? 'Partial Match' : 'Low Match';
+        color    = scorePct >= 70 ? '#10b981' : scorePct >= 50 ? '#f59e0b' : scorePct >= 35 ? '#f97316' : '#ef4444';
+    }
 
     const circumference = 2 * Math.PI * 26; // ≈163.36
     const offset = circumference - (scorePct / 100) * circumference;

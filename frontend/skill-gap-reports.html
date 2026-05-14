@@ -94,6 +94,17 @@
             </div>
         </div>
 
+        <!-- ── My Saved Roadmaps ── -->
+        <section id="saved-roadmaps-section" class="container" style="padding-top:36px;padding-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                <h2 style="font-size:1.1rem;font-weight:700;color:#f1f5f9;">📚 My Saved Roadmaps</h2>
+                <button id="refresh-roadmaps-btn" style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 12px;color:#94a3b8;font-size:0.8rem;cursor:pointer;font-family:Inter,sans-serif;">↺ Refresh</button>
+            </div>
+            <div id="saved-roadmaps-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
+                <p id="saved-roadmaps-empty" style="color:#64748b;font-size:0.9rem;grid-column:1/-1;display:none;">No saved roadmaps yet. Generate one above!</p>
+            </div>
+        </section>
+
         <!-- Roadmap Section -->
         <section id="roadmap-section" class="roadmap-section hidden">
             <div class="container">
@@ -113,7 +124,16 @@
                         </div>
                         <div class="progress-text-group">
                             <span id="progress-text" class="progress-text">0 of 0 completed</span>
-                            <button class="reset-btn" id="reset-btn">↺ Reset Progress</button>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                <button class="reset-btn" id="reset-btn">↺ Reset Progress</button>
+                                <button id="save-roadmap-btn" style="
+                                    padding:7px 16px;border-radius:9px;
+                                    background:linear-gradient(135deg,rgba(124,106,247,0.25),rgba(99,102,241,0.18));
+                                    border:1px solid rgba(124,106,247,0.45);color:#a78bfa;
+                                    font-family:Inter,sans-serif;font-size:0.82rem;font-weight:700;
+                                    cursor:pointer;white-space:nowrap;transition:opacity 0.15s;
+                                ">💾 Save Roadmap</button>
+                            </div>
                         </div>
                     </div>
                 </div>
