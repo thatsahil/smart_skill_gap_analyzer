@@ -493,13 +493,73 @@
                                     <button class="save-btn" id="generate-intro-btn">✨ Generate Intro</button>
                                     
                                     <div id="intro-result-container" style="display:none;margin-top:20px;">
-                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;margin-bottom:16px;">
-                                            <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-1);margin-bottom:8px;">Your Script</h3>
-                                            <p id="intro-script-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;"></p>
+                                        
+                                        <!-- Voice Controls -->
+                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                                            <div class="fg" style="margin:0;min-width:140px;">
+                                                <select id="voice-select" style="padding:6px 10px;font-size:0.8rem;">
+                                                    <option value="female">Female Voice</option>
+                                                    <option value="male">Male Voice</option>
+                                                </select>
+                                            </div>
+                                            <div class="fg" style="margin:0;min-width:110px;">
+                                                <select id="speed-select" style="padding:6px 10px;font-size:0.8rem;">
+                                                    <option value="0.75">Slow (0.75x)</option>
+                                                    <option value="0.95" selected>Normal (1x)</option>
+                                                    <option value="1.15">Fast (1.15x)</option>
+                                                </select>
+                                            </div>
+                                            <button id="play-intro-btn" class="save-btn" style="margin:0;padding:6px 14px;font-size:0.8rem;background:var(--accent-dim);color:var(--accent-light);border:1px solid var(--accent);box-shadow:none;">
+                                                🔊 Listen to Intro
+                                            </button>
+                                            <button id="stop-intro-btn" class="save-btn" style="margin:0;padding:6px 14px;font-size:0.8rem;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);box-shadow:none;display:none;">
+                                                ⏹ Stop
+                                            </button>
                                         </div>
-                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;">
-                                            <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-1);margin-bottom:8px;">Speaking & Voice Modulation Advice</h3>
-                                            <p id="intro-advice-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;"></p>
+
+                                        <div style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;margin-bottom:16px;">
+                                            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                                                <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-1);margin:0;">Your Script</h3>
+                                                <button id="save-intro-btn" class="save-btn" style="margin:0;padding:4px 10px;font-size:0.75rem;background:rgba(99,102,241,0.1);color:#a78bfa;border:1px solid rgba(99,102,241,0.3);box-shadow:none;">💾 Save Intro</button>
+                                            </div>
+                                            <p id="intro-script-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;margin:0;"></p>
+                                        </div>
+                                        
+                                        <details style="background:var(--bg-raised);border:1px solid var(--border-md);border-radius:8px;padding:16px;">
+                                            <summary style="font-size:0.9rem;font-weight:600;color:var(--text-1);cursor:pointer;outline:none;">Read Detailed Speaking & Voice Modulation Advice</summary>
+                                            <p id="intro-advice-text" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;white-space:pre-wrap;margin-top:12px;"></p>
+                                        </details>
+
+                                        <!-- Practice Section -->
+                                        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);">
+                                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                                                <h3 style="font-size:1rem;font-weight:600;color:var(--text-1);">🎙 Practice Intro</h3>
+                                            </div>
+                                            <p style="font-size:0.85rem;color:var(--text-2);margin-bottom:16px;">Click start and practice your introduction. The AI will listen and provide constructive feedback on your delivery.</p>
+                                            
+                                            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                                                <button id="start-practice-btn" class="save-btn" style="margin:0;background:#10b981;color:#fff;">
+                                                    ⏺ Start Recording
+                                                </button>
+                                                <button id="stop-practice-btn" class="save-btn" style="margin:0;background:#ef4444;color:#fff;display:none;">
+                                                    ⏹ Stop Recording
+                                                </button>
+                                                <button id="get-feedback-btn" class="save-btn" style="margin:0;background:var(--accent);color:#fff;display:none;">
+                                                    📊 Get Feedback
+                                                </button>
+                                            </div>
+
+                                            <div id="practice-status" style="font-size:0.8rem;color:#34d399;font-weight:600;margin-bottom:10px;display:none;">Listening... Speak now.</div>
+                                            
+                                            <textarea id="practice-transcript" placeholder="Your speech will appear here..." rows="4" style="width:100%;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text-1);font-family:inherit;font-size:0.85rem;resize:vertical;"></textarea>
+
+                                            <div id="practice-feedback-container" style="display:none;margin-top:20px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:16px;">
+                                                <h3 style="font-size:0.95rem;font-weight:600;color:#a78bfa;margin-bottom:8px;">Feedback Result</h3>
+                                                <p id="feedback-summary" style="font-size:0.85rem;font-weight:600;color:var(--text-1);margin-bottom:12px;"></p>
+                                                <p id="feedback-detailed" style="font-size:0.85rem;color:var(--text-2);line-height:1.6;margin-bottom:12px;white-space:pre-wrap;"></p>
+                                                <h4 style="font-size:0.85rem;font-weight:600;color:var(--text-1);margin-bottom:6px;">Tips for Improvement:</h4>
+                                                <ul id="feedback-tips" style="font-size:0.85rem;color:var(--text-2);padding-left:20px;margin:0;"></ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

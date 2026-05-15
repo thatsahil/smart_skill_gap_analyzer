@@ -17,7 +17,7 @@ The Skill Gap Analyzer is an intelligent, multi-role platform designed to help j
 7. **AI Career Coach** — Interactive chat widget for interview prep, resume tips, and career advice (candidates only).
 8. **Job Board + Apply** — Browse all job openings and apply with one click.
 9. **Deadline Enforcement** — Jobs past their application deadline show a **CLOSED** badge; the Apply button is disabled.
-
+10. **Interview Coaching Tools (Self-Intro)** — On the Profile page, generate a customized AI self-introduction script based on your experience. Listen to the script using customizable Text-to-Speech (Indian-English accents, male/female voices, speed control), and practice delivery via microphone to get real-time AI feedback. Scripts can be saved directly to your profile.
 ### Company
 1. **Post Jobs** — Create job openings with Title, Description, Required Skills, and Last Date to Apply.
 2. **Manage Postings** — Edit or delete your job listings from the dashboard.
@@ -317,6 +317,8 @@ API: `GET /api/admin/cluster-candidates?admin_id=<id>&role=Frontend Developer`
 | `POST` | `/api/save-progress` | Save roadmap progress to DB |
 | `GET`  | `/api/load-progress` | Load roadmap progress from DB |
 | `GET`  | `/api/my-roadmaps` | List all saved roadmaps for a user |
+| `POST` | `/api/generate-intro` | Generate an AI self-introduction script |
+| `POST` | `/api/evaluate-intro` | Analyze practice audio transcript vs ideal script |
 
 ### Resume & Analysis
 | Method | Route | Description |
@@ -428,6 +430,12 @@ smart_skill_gap_analyzer/
 
 #### Dashboard
 - **Removed Check Fit** — The `⚡ Check Fit` button and score chip have been removed from job cards. Candidates now only see the **Apply** button.
+
+#### Candidate Profile — Interview Coaching Tools
+- **Self-Intro Generation** — Candidates can generate a customized self-introduction script tailored to their experience, internships, and certifications.
+- **Voice Playback** — Integrated Text-to-Speech (TTS) with Indian-English accents, allowing candidates to select female/male voices and adjust playback speed to listen to the generated introduction.
+- **Speech Practice & Feedback** — Added microphone integration (SpeechRecognition API) to let candidates practice their intro delivery. Evaluated by Gemini AI (`/api/evaluate-intro`) to provide constructive feedback on content coverage, clarity, and tips for improvement.
+- **Persistent Storage** — Self-intro scripts can be saved to the candidate's profile.
 
 #### Company — ATS Score
 - **New `/api/ats-score` endpoint** — Companies click **📊 ATS Score** next to any applicant (who has a resume) to see:

@@ -12,10 +12,10 @@ function showToast(message, type = 'info') {
         document.body.appendChild(tc);
     }
     const c = {
-        success: { bg:'rgba(16,185,129,0.15)', border:'rgba(16,185,129,0.4)', text:'#34d399', icon:'✅' },
-        error:   { bg:'rgba(239,68,68,0.15)',  border:'rgba(239,68,68,0.4)',  text:'#fca5a5', icon:'⚠️' },
-        info:    { bg:'rgba(99,102,241,0.15)', border:'rgba(99,102,241,0.4)', text:'#a5b4fc', icon:'ℹ️' },
-    }[type] || { bg:'rgba(99,102,241,0.15)', border:'rgba(99,102,241,0.4)', text:'#a5b4fc', icon:'ℹ️' };
+        success: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.4)', text: '#34d399', icon: '✅' },
+        error: { bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.4)', text: '#fca5a5', icon: '⚠️' },
+        info: { bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.4)', text: '#a5b4fc', icon: 'ℹ️' },
+    }[type] || { bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.4)', text: '#a5b4fc', icon: 'ℹ️' };
     const toast = document.createElement('div');
     toast.style.cssText = `display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:10px;
         min-width:260px;max-width:380px;background:${c.bg};border:1px solid ${c.border};color:${c.text};
@@ -67,15 +67,15 @@ function buildExperienceEntry(data = {}) {
     div.innerHTML = `
         <button type="button" class="entry-remove" title="Remove">✕</button>
         <div class="fg"><label>Job Title</label>
-            <input type="text" name="exp_title" placeholder="Software Engineer" value="${escStr(data.title||'')}"></div>
+            <input type="text" name="exp_title" placeholder="Software Engineer" value="${escStr(data.title || '')}"></div>
         <div class="fg"><label>Company</label>
-            <input type="text" name="exp_company" placeholder="Google" value="${escStr(data.company||'')}"></div>
+            <input type="text" name="exp_company" placeholder="Google" value="${escStr(data.company || '')}"></div>
         <div class="fg"><label>Start Date</label>
-            <input type="month" name="exp_start" value="${escStr(data.start||'')}"></div>
+            <input type="month" name="exp_start" value="${escStr(data.start || '')}"></div>
         <div class="fg"><label>End Date (leave blank if current)</label>
-            <input type="month" name="exp_end" value="${escStr(data.end||'')}"></div>
+            <input type="month" name="exp_end" value="${escStr(data.end || '')}"></div>
         <div class="fg span-2"><label>Description</label>
-            <textarea name="exp_desc" rows="2" placeholder="Key achievements and responsibilities…">${escStr(data.description||'')}</textarea></div>`;
+            <textarea name="exp_desc" rows="2" placeholder="Key achievements and responsibilities…">${escStr(data.description || '')}</textarea></div>`;
     div.querySelector('.entry-remove').onclick = () => div.remove();
     return div;
 }
@@ -86,18 +86,18 @@ function buildInternshipEntry(data = {}) {
     div.innerHTML = `
         <button type="button" class="entry-remove" title="Remove">✕</button>
         <div class="fg"><label>Role</label>
-            <input type="text" name="int_role" placeholder="Frontend Intern" value="${escStr(data.role||'')}"></div>
+            <input type="text" name="int_role" placeholder="Frontend Intern" value="${escStr(data.role || '')}"></div>
         <div class="fg"><label>Organization</label>
-            <input type="text" name="int_org" placeholder="Startup XYZ" value="${escStr(data.organization||'')}"></div>
+            <input type="text" name="int_org" placeholder="Startup XYZ" value="${escStr(data.organization || '')}"></div>
         <div class="fg"><label>Duration</label>
-            <input type="text" name="int_duration" placeholder="Jun 2024 – Aug 2024" value="${escStr(data.duration||'')}"></div>
+            <input type="text" name="int_duration" placeholder="Jun 2024 – Aug 2024" value="${escStr(data.duration || '')}"></div>
         <div class="fg"><label>Type</label>
             <select name="int_type">
                 <option value="">Select…</option>
-                ${['On-site','Remote','Hybrid'].map(o=>`<option${data.type===o?' selected':''}>${o}</option>`).join('')}
+                ${['On-site', 'Remote', 'Hybrid'].map(o => `<option${data.type === o ? ' selected' : ''}>${o}</option>`).join('')}
             </select></div>
         <div class="fg span-2"><label>What You Did</label>
-            <textarea name="int_desc" rows="2" placeholder="Key tasks and learnings…">${escStr(data.description||'')}</textarea></div>`;
+            <textarea name="int_desc" rows="2" placeholder="Key tasks and learnings…">${escStr(data.description || '')}</textarea></div>`;
     div.querySelector('.entry-remove').onclick = () => div.remove();
     return div;
 }
@@ -108,48 +108,48 @@ function buildCertificationEntry(data = {}) {
     div.innerHTML = `
         <button type="button" class="entry-remove" title="Remove">✕</button>
         <div class="fg"><label>Certificate Name</label>
-            <input type="text" name="cert_name" placeholder="AWS Certified Developer" value="${escStr(data.name||'')}"></div>
+            <input type="text" name="cert_name" placeholder="AWS Certified Developer" value="${escStr(data.name || '')}"></div>
         <div class="fg"><label>Issuing Organization</label>
-            <input type="text" name="cert_org" placeholder="Amazon Web Services" value="${escStr(data.organization||'')}"></div>
+            <input type="text" name="cert_org" placeholder="Amazon Web Services" value="${escStr(data.organization || '')}"></div>
         <div class="fg"><label>Issue Date</label>
-            <input type="month" name="cert_date" value="${escStr(data.date||'')}"></div>
+            <input type="month" name="cert_date" value="${escStr(data.date || '')}"></div>
         <div class="fg"><label>Credential ID / URL</label>
-            <input type="text" name="cert_url" placeholder="Credential ID or verify URL" value="${escStr(data.credential||'')}"></div>`;
+            <input type="text" name="cert_url" placeholder="Credential ID or verify URL" value="${escStr(data.credential || '')}"></div>`;
     div.querySelector('.entry-remove').onclick = () => div.remove();
     return div;
 }
 
 function escStr(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── Collect entry lists ───────────────────────────────────────────────────────
 function collectExperience() {
     return [...document.querySelectorAll('#experience-list .entry-item')].map(el => ({
-        title:       el.querySelector('[name=exp_title]')?.value.trim()||'',
-        company:     el.querySelector('[name=exp_company]')?.value.trim()||'',
-        start:       el.querySelector('[name=exp_start]')?.value||'',
-        end:         el.querySelector('[name=exp_end]')?.value||'',
-        description: el.querySelector('[name=exp_desc]')?.value.trim()||'',
+        title: el.querySelector('[name=exp_title]')?.value.trim() || '',
+        company: el.querySelector('[name=exp_company]')?.value.trim() || '',
+        start: el.querySelector('[name=exp_start]')?.value || '',
+        end: el.querySelector('[name=exp_end]')?.value || '',
+        description: el.querySelector('[name=exp_desc]')?.value.trim() || '',
     }));
 }
 
 function collectInternships() {
     return [...document.querySelectorAll('#internships-list .entry-item')].map(el => ({
-        role:         el.querySelector('[name=int_role]')?.value.trim()||'',
-        organization: el.querySelector('[name=int_org]')?.value.trim()||'',
-        duration:     el.querySelector('[name=int_duration]')?.value.trim()||'',
-        type:         el.querySelector('[name=int_type]')?.value||'',
-        description:  el.querySelector('[name=int_desc]')?.value.trim()||'',
+        role: el.querySelector('[name=int_role]')?.value.trim() || '',
+        organization: el.querySelector('[name=int_org]')?.value.trim() || '',
+        duration: el.querySelector('[name=int_duration]')?.value.trim() || '',
+        type: el.querySelector('[name=int_type]')?.value || '',
+        description: el.querySelector('[name=int_desc]')?.value.trim() || '',
     }));
 }
 
 function collectCertifications() {
     return [...document.querySelectorAll('#certifications-list .entry-item')].map(el => ({
-        name:         el.querySelector('[name=cert_name]')?.value.trim()||'',
-        organization: el.querySelector('[name=cert_org]')?.value.trim()||'',
-        date:         el.querySelector('[name=cert_date]')?.value||'',
-        credential:   el.querySelector('[name=cert_url]')?.value.trim()||'',
+        name: el.querySelector('[name=cert_name]')?.value.trim() || '',
+        organization: el.querySelector('[name=cert_org]')?.value.trim() || '',
+        date: el.querySelector('[name=cert_date]')?.value || '',
+        credential: el.querySelector('[name=cert_url]')?.value.trim() || '',
     }));
 }
 
@@ -158,21 +158,21 @@ function populateExperience(list) {
     const container = document.getElementById('experience-list');
     if (!container) return;
     container.innerHTML = '';
-    (list||[]).forEach(item => container.appendChild(buildExperienceEntry(item)));
+    (list || []).forEach(item => container.appendChild(buildExperienceEntry(item)));
 }
 
 function populateInternships(list) {
     const container = document.getElementById('internships-list');
     if (!container) return;
     container.innerHTML = '';
-    (list||[]).forEach(item => container.appendChild(buildInternshipEntry(item)));
+    (list || []).forEach(item => container.appendChild(buildInternshipEntry(item)));
 }
 
 function populateCertifications(list) {
     const container = document.getElementById('certifications-list');
     if (!container) return;
     container.innerHTML = '';
-    (list||[]).forEach(item => container.appendChild(buildCertificationEntry(item)));
+    (list || []).forEach(item => container.appendChild(buildCertificationEntry(item)));
 }
 
 // ── Active Nav ────────────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ function setActiveNav() {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
-    const userId   = localStorage.getItem('user_id');
+    const userId = localStorage.getItem('user_id');
     const userType = localStorage.getItem('user_type');
 
     if (!userId) { window.location.href = 'login.html'; return; }
@@ -202,15 +202,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const candidateProfile = document.getElementById('candidate-profile');
-    const companyProfile   = document.getElementById('company-profile');
+    const companyProfile = document.getElementById('company-profile');
 
     if (userType === 'company') {
-        if (companyProfile)   companyProfile.style.display = 'block';
+        if (companyProfile) companyProfile.style.display = 'block';
         if (candidateProfile) candidateProfile.style.display = 'none';
         loadProfile(document.getElementById('company-profile-form'));
     } else {
         if (candidateProfile) candidateProfile.style.display = 'block';
-        if (companyProfile)   companyProfile.style.display = 'none';
+        if (companyProfile) companyProfile.style.display = 'none';
         initSidebarNav();
         loadProfile(document.getElementById('candidate-profile-form'));
         initResumeSection(userId);
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Load profile ──────────────────────────────────────────────────────
     async function loadProfile(form) {
         try {
-            const res  = await fetch(`${BACKEND_PROFILE}/api/profile?user_id=${userId}`);
+            const res = await fetch(`${BACKEND_PROFILE}/api/profile?user_id=${userId}`);
             const data = await res.json();
             if (res.ok) {
                 for (const key in data) {
@@ -231,6 +231,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 populateExperience(data.experience_list || []);
                 populateInternships(data.internships_list || []);
                 populateCertifications(data.certifications_list || []);
+
+                if (data.saved_intro_script) {
+                    const scriptText = document.getElementById('intro-script-text');
+                    const container = document.getElementById('intro-result-container');
+                    if (scriptText && container) {
+                        scriptText.textContent = data.saved_intro_script;
+                        document.getElementById('intro-advice-text').textContent = data.saved_intro_advice || '';
+                        container.style.display = 'block';
+                    }
+                }
             }
         } catch { showToast('Could not connect to the server.', 'error'); }
     }
@@ -238,16 +248,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Basic profile form submit ─────────────────────────────────────────
     async function handleProfileUpdate(event) {
         event.preventDefault();
-        const form      = event.target;
+        const form = event.target;
         const submitBtn = form.querySelector('button[type="submit"]');
-        const formData  = new FormData(form);
-        const jsonData  = { user_id: userId };
+        const formData = new FormData(form);
+        const jsonData = { user_id: userId };
         formData.forEach((v, k) => { jsonData[k] = v; });
 
         submitBtn.textContent = 'Saving…';
         submitBtn.disabled = true;
         try {
-            const res    = await fetch(`${BACKEND_PROFILE}/api/profile`, {
+            const res = await fetch(`${BACKEND_PROFILE}/api/profile`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(jsonData),
             });
@@ -298,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (res.ok) showToast('Saved successfully!', 'success');
             else showToast(`Error: ${result.message}`, 'error');
         } catch { showToast('An unexpected error occurred.', 'error'); }
-        finally { if (btn) { btn.textContent = '💾 Save ' + key.replace('_list','').replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()); btn.disabled = false; } }
+        finally { if (btn) { btn.textContent = '💾 Save ' + key.replace('_list', '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()); btn.disabled = false; } }
     }
 
     // ── Generate Intro ────────────────────────────────────────────────────
@@ -356,7 +366,245 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ── Delete account ────────────────────────────────────────────────────
+    document.getElementById('save-intro-btn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('save-intro-btn');
+        const script = document.getElementById('intro-script-text').textContent;
+        const advice = document.getElementById('intro-advice-text').textContent;
+        if (!script) return;
+
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${BACKEND_PROFILE}/api/profile`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, saved_intro_script: script, saved_intro_advice: advice })
+            });
+            if (res.ok) showToast('Intro saved successfully!', 'success');
+            else showToast('Failed to save intro', 'error');
+        } catch {
+            showToast('Error saving intro.', 'error');
+        } finally {
+            btn.textContent = '💾 Save Intro';
+            btn.disabled = false;
+        }
+    });
+
+    // ── Intro Audio Playback ──────────────────────────────────────────────
+    const playIntroBtn = document.getElementById('play-intro-btn');
+    const stopIntroBtn = document.getElementById('stop-intro-btn');
+    const voiceSelect = document.getElementById('voice-select');
+    let synth = window.speechSynthesis;
+
+    playIntroBtn?.addEventListener('click', () => {
+        const text = document.getElementById('intro-script-text').textContent;
+        if (!text) return;
+
+        synth.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        let voices = synth.getVoices();
+
+        if (voices.length === 0) {
+            showToast('Loading voices, please try again in a moment.', 'info');
+            return;
+        }
+
+        const gender = voiceSelect.value;
+        let selectedVoice = null;
+
+        // Prioritize Indian English voices
+        const indianVoices = voices.filter(v => v.lang.includes('IN') || v.name.includes('India'));
+
+        if (gender === 'female') {
+            selectedVoice = indianVoices.find(v => v.name.includes('Female') || v.name.includes('Heera') || v.name.includes('Aditi'))
+                || indianVoices[0]
+                || voices.find(v => v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha'))
+                || voices.find(v => v.lang.startsWith('en'));
+        } else {
+            selectedVoice = indianVoices.find(v => v.name.includes('Male') || v.name.includes('Ravi') || v.name.includes('Rishi'))
+                || indianVoices[0]
+                || voices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel'))
+                || voices.find(v => v.lang.startsWith('en'));
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
+
+        const speedSelect = document.getElementById('speed-select');
+        utterance.rate = speedSelect ? parseFloat(speedSelect.value) : 1.0;
+        utterance.pitch = 1.0;
+
+        utterance.onstart = () => {
+            playIntroBtn.style.display = 'none';
+            stopIntroBtn.style.display = 'inline-flex';
+        };
+
+        utterance.onend = () => {
+            playIntroBtn.style.display = 'inline-flex';
+            stopIntroBtn.style.display = 'none';
+        };
+
+        utterance.onerror = () => {
+            playIntroBtn.style.display = 'inline-flex';
+            stopIntroBtn.style.display = 'none';
+        };
+
+        synth.speak(utterance);
+    });
+
+    stopIntroBtn?.addEventListener('click', () => {
+        synth.cancel();
+        playIntroBtn.style.display = 'inline-flex';
+        stopIntroBtn.style.display = 'none';
+    });
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => synth.getVoices();
+    }
+
+
+    // ── Practice Intro ────────────────────────────────────────────────────
+    const startPracticeBtn = document.getElementById('start-practice-btn');
+    const stopPracticeBtn = document.getElementById('stop-practice-btn');
+    const getFeedbackBtn = document.getElementById('get-feedback-btn');
+    const practiceTranscript = document.getElementById('practice-transcript');
+    const practiceStatus = document.getElementById('practice-status');
+    const feedbackContainer = document.getElementById('practice-feedback-container');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let finalTranscript = '';
+    let isPracticing = false;
+    let shouldRestart = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN'; // Indian English by default
+
+        recognition.onstart = () => {
+            practiceStatus.style.display = 'block';
+            startPracticeBtn.style.display = 'none';
+            stopPracticeBtn.style.display = 'inline-flex';
+            getFeedbackBtn.style.display = 'none';
+            feedbackContainer.style.display = 'none';
+            if (!isPracticing) {
+                practiceTranscript.value = '';
+                finalTranscript = '';
+            }
+            isPracticing = true;
+            shouldRestart = false;
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            practiceTranscript.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'no-speech') {
+                shouldRestart = true;
+            } else if (event.error === 'network') {
+                shouldRestart = true;
+                recognition.lang = ''; // Fallback to default if network blocks en-IN
+            } else {
+                isPracticing = false;
+                if (event.error === 'audio-capture') {
+                    showToast('No microphone found.', 'error');
+                } else if (event.error === 'not-allowed') {
+                    showToast('Microphone permission denied.', 'error');
+                } else {
+                    showToast(`Microphone error: ${event.error}`, 'error');
+                }
+            }
+        };
+
+        recognition.onend = () => {
+            if (isPracticing && shouldRestart) {
+                try { recognition.start(); } catch (e) { }
+            } else {
+                isPracticing = false;
+                practiceStatus.style.display = 'none';
+                startPracticeBtn.style.display = 'inline-flex';
+                stopPracticeBtn.style.display = 'none';
+                if (practiceTranscript.value.trim().length > 10) {
+                    getFeedbackBtn.style.display = 'inline-flex';
+                }
+            }
+        };
+
+        startPracticeBtn?.addEventListener('click', () => {
+            isPracticing = false; // Fresh start
+            recognition.start();
+        });
+
+        stopPracticeBtn?.addEventListener('click', () => {
+            isPracticing = false;
+            shouldRestart = false;
+            recognition.stop();
+        });
+    } else {
+        if (startPracticeBtn) {
+            startPracticeBtn.disabled = true;
+            startPracticeBtn.title = 'Speech Recognition is not supported in this browser. Please use Chrome or Edge.';
+        }
+    }
+
+    getFeedbackBtn?.addEventListener('click', async () => {
+        const spokenText = practiceTranscript.value.trim();
+        const idealScript = document.getElementById('intro-script-text').textContent.trim();
+
+        if (!spokenText || !idealScript) {
+            showToast('Nothing to evaluate. Please generate intro and record practice.', 'error');
+            return;
+        }
+
+        getFeedbackBtn.textContent = 'Analyzing...';
+        getFeedbackBtn.disabled = true;
+
+        try {
+            const res = await fetch(`${BACKEND_PROFILE}/api/evaluate-intro`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ideal_script: idealScript, spoken_text: spokenText })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                document.getElementById('feedback-summary').textContent = data.data.feedback_summary;
+                document.getElementById('feedback-detailed').textContent = data.data.detailed_feedback;
+
+                const tipsList = document.getElementById('feedback-tips');
+                tipsList.innerHTML = '';
+                (data.data.tips || []).forEach(tip => {
+                    const li = document.createElement('li');
+                    li.textContent = tip;
+                    li.style.marginBottom = '4px';
+                    tipsList.appendChild(li);
+                });
+
+                feedbackContainer.style.display = 'block';
+                showToast('Feedback generated successfully!', 'success');
+            } else {
+                showToast(data.error || 'Failed to generate feedback.', 'error');
+            }
+        } catch (e) {
+            showToast('An error occurred while getting feedback.', 'error');
+        } finally {
+            getFeedbackBtn.textContent = '📊 Get Feedback';
+            getFeedbackBtn.disabled = false;
+        }
+    });
     document.querySelectorAll('#delete-account-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             showConfirm('Are you absolutely sure? This will <strong>permanently delete</strong> your account and all data.', async () => {
@@ -380,23 +628,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ── Resume Section ────────────────────────────────────────────────────────────
 function initResumeSection(userId) {
-    const storedState  = document.getElementById('resume-stored-state');
-    const uploadState  = document.getElementById('resume-upload-state');
-    const dropzone     = document.getElementById('profile-resume-drop');
-    const fileInput    = document.getElementById('profile-resume-input');
-    const dropContent  = document.getElementById('profile-drop-content');
+    const storedState = document.getElementById('resume-stored-state');
+    const uploadState = document.getElementById('resume-upload-state');
+    const dropzone = document.getElementById('profile-resume-drop');
+    const fileInput = document.getElementById('profile-resume-input');
+    const dropContent = document.getElementById('profile-drop-content');
     const fileSelected = document.getElementById('profile-file-selected');
-    const fileNameEl   = document.getElementById('profile-file-name');
-    const uploadBtn    = document.getElementById('upload-resume-btn');
-    const downloadBtn  = document.getElementById('download-resume-btn');
-    const replaceBtn   = document.getElementById('replace-resume-btn');
+    const fileNameEl = document.getElementById('profile-file-name');
+    const uploadBtn = document.getElementById('upload-resume-btn');
+    const downloadBtn = document.getElementById('download-resume-btn');
+    const replaceBtn = document.getElementById('replace-resume-btn');
 
     if (!storedState || !uploadState) return;
 
     fetch(`http://127.0.0.1:5000/api/resume?user_id=${userId}`)
         .then(r => r.json())
         .then(data => { if (data.exists) showStoredResume(userId, data, storedState, uploadState, downloadBtn); })
-        .catch(() => {});
+        .catch(() => { });
 
     dropzone?.addEventListener('click', (e) => { if (!e.target.closest('#upload-resume-btn')) fileInput.click(); });
     dropzone?.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
@@ -417,7 +665,7 @@ function initResumeSection(userId) {
         fd.append('user_id', userId);
         fd.append('resume', fileInput.files[0]);
         try {
-            const res  = await fetch('http://127.0.0.1:5000/api/upload-resume', { method: 'POST', body: fd });
+            const res = await fetch('http://127.0.0.1:5000/api/upload-resume', { method: 'POST', body: fd });
             const data = await res.json();
             if (res.ok) {
                 showToast('Resume uploaded successfully!', 'success');

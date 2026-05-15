@@ -413,3 +413,56 @@ Return only the raw JSON object."""
         return jsonify({"error": f"Could not parse Gemini response: {e}"}), 500
     except Exception as e:
         return jsonify({"error": f"Intro generation failed: {e}"}), 500
+
+@analyze_bp.route('/api/evaluate-intro', methods=['POST'])
+def evaluate_intro():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Gemini API key is not configured."}), 500
+
+    data = request.json
+    ideal_script = data.get('ideal_script', '').strip()
+    spoken_text = data.get('spoken_text', '').strip()
+
+    if not ideal_script or not spoken_text:
+        return jsonify({"error": "Both ideal script and spoken text are required"}), 400
+
+    prompt = f"""You are an expert interview coach.
+The candidate was supposed to practice the following self-introduction script:
+--- IDEAL SCRIPT ---
+{ideal_script}
+--------------------
+
+Here is a transcript of what the candidate actually spoke:
+--- SPOKEN TEXT ---
+{spoken_text}
+-------------------
+
+Evaluate the candidate's spoken introduction against the ideal script. Provide constructive, encouraging feedback on:
+1. Content coverage (did they miss any crucial points?).
+2. Clarity and flow (based on the transcript structure).
+3. Confidence signals (did they use filler words or lose their train of thought?).
+4. Provide 1-2 practical tips for improvement.
+
+Return ONLY a valid JSON object (no markdown, no code fences) with exactly these keys:
+- "feedback_summary": A short 1-sentence overall encouraging summary.
+- "detailed_feedback": A paragraph or bullet points evaluating their content, flow, and missing points.
+- "tips": An array of 1-2 strings, each being a short tip for improvement.
+Return only the raw JSON object."""
+
+    headers = {'Content-Type': 'application/json'}
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+
+    try:
+        response = http_requests.post(GEMINI_URL, headers=headers, json=payload, timeout=60)
+        response.raise_for_status()
+
+        text = response.json()['candidates'][0]['content']['parts'][0]['text']
+        text = re.sub(r'^```(?:json)?\s*', '', text.strip())
+        text = re.sub(r'```\s*$', '', text.strip())
+
+        evaluation = json.loads(text.strip())
+        return jsonify({"success": True, "data": evaluation}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Evaluation failed: {e}"}), 500
+
